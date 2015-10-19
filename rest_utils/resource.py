@@ -119,6 +119,8 @@ class ModelBaseResource(BaseResource):
     def serializer(self):
         return ModelSerializer(self.model)
 
+    list_serializer = serializer
+
     @asyncio.coroutine
     def get_instance(self, ident):
         with (yield from self.get_engine()) as conn:
@@ -189,8 +191,7 @@ class ListModelMixin(ListMixin):
             while True:
                 instance = yield from result.fetchone()
                 if not instance: break
-                # instance = self.validate(self.trafaret_out, dict(instance))
-                instance = self.validate(dict(instance))
+                instance = self.list_serializer.serialize(dict(instance))
                 instances.append(instance)
         data = {self.pluralname: instances}
         return JSONResponse(
