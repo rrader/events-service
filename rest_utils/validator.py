@@ -54,7 +54,10 @@ class ModelValidator(ColumnScissors):
             key_opts = {}
             key_opts['optional'] = column.nullable
             key = t.Key(column.name, **key_opts)
-            fields[key] = self.cut(column)
+            trafaret = self.cut(column)
+            if column.nullable:
+                trafaret |= t.Null()
+            fields[key] = trafaret
         return t.Dict(fields)
 
     def check(self, instance):
@@ -72,7 +75,10 @@ class ModelSerializer(ColumnScissors):
         fields = {}
         for column in self._model.__table__.columns.values():
             key = t.Key(column.name)
-            fields[key] = self.cut(column)
+            trafaret = self.cut(column)
+            if column.nullable:
+                trafaret |= t.Null()
+            fields[key] = trafaret
         return t.Dict(fields)
 
     def serialize(self, instance):
