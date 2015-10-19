@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp.web import Application
-from test_service import models, resources
+from events_service import models, resources
 
 
 def build_application():
