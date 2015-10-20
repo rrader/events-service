@@ -6,7 +6,7 @@ from aiohttp import web
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPNotFound
 from trafaret import DataError
 from rest_utils.response import JSONResponse
-from rest_utils.validator import ModelValidator, ValidationError, ModelSerializer
+from rest_utils.validator import ModelValidator, ModelSerializer
 
 
 class BaseResource:
@@ -103,6 +103,15 @@ class ModelBaseResource(BaseResource):
             raise HTTPBadRequest(text=json.dumps(e.as_dict()))
         return instance
 
+    @asyncio.coroutine
+    def get_instance(self, ident):
+        with (yield from self.get_engine()) as conn:
+            result = yield from conn.execute(
+                self.base_query.where(self.lookup_key == ident)  # TODO: via metadata??
+            )
+            instance = yield from result.fetchone()
+        return instance
+
     @property
     def singlename(self):
         return self.model.__name__.lower()
@@ -121,22 +130,19 @@ class ModelBaseResource(BaseResource):
 
     list_serializer = serializer
 
-    @asyncio.coroutine
-    def get_instance(self, ident):
-        with (yield from self.get_engine()) as conn:
-            table = self.model.__table__
-            result = yield from conn.execute(
-                table.select().where(table.c.id == ident)  # TODO: via metadata??
-            )
-            instance = yield from result.fetchone()
-        return instance
+    @property
+    def base_query(self):
+        return self.model.__table__.select()
+
+    @property
+    def lookup_key(self):
+        return self.model.__table__.c.id  # TODO: go through columns and find primary key
 
 
 class CreateModelMixin(CreateMixin):
     @asyncio.coroutine
     def create(self, request):
         data = yield from request.json()
-        # data = self.validate(self.trafaret_in, data)
         data = self.validate(data)
 
         with (yield from self.get_engine()) as conn:
@@ -167,7 +173,6 @@ class RetrieveModelMixin(RetrieveMixin):
         if not instance:
             raise HTTPNotFound(text=json.dumps({'id': ident}))
         instance = dict(instance)
-        # instance = self.validate(self.trafaret_out, dict(instance))
         instance = self.serialize(dict(instance))
         data = json.dumps(instance).encode()
         return JSONResponse(
@@ -180,20 +185,32 @@ class RetrieveModelMixin(RetrieveMixin):
 
 
 class ListModelMixin(ListMixin):
+    page_size = 10
+
     @asyncio.coroutine
     def list(self, request):
+        offset = int(request.GET.get('offset', 0))
+        limit = int(request.GET.get('count', self.page_size))
+        query = self.base_query.offset(offset).limit(limit + 1)
         with (yield from self.get_engine()) as conn:
-            table = self.model.__table__
-            result = yield from conn.execute(
-                table.select()
-            )
-            instances = []
-            while True:
-                instance = yield from result.fetchone()
-                if not instance: break
-                instance = self.list_serializer.serialize(dict(instance))
-                instances.append(instance)
-        data = {self.pluralname: instances}
+            result = yield from conn.execute(query)
+            instances = yield from result.fetchall()
+
+        has_next = len(instances) > limit
+        if has_next:
+            del instances[-1]
+        page = [self.list_serializer.serialize(dict(instance))
+                for instance in instances]
+
+        data = {self.pluralname: page,
+                'has_next': has_next,
+                'count': len(page),
+                'offset': offset}
+        if has_next:
+            next_path = self.app.router[self.list_routename].\
+                url(query={'count': limit, 'offset': offset + limit})
+            next_url = "{}://{}{}".format(request.scheme, request.host, next_path)
+            data.update({'next': next_url})
         return JSONResponse(
                data,
                status=http.HTTPStatus.OK.value)
@@ -201,6 +218,7 @@ class ListModelMixin(ListMixin):
     @property
     def list_routename(self):
         return '{}-list'.format(self.singlename)
+
 
 
 class ModelResource(CreateModelMixin,

@@ -1,7 +1,7 @@
--e git://github.com/rrader/aio_manager.git@master#egg=aio_manager
+-e git://github.com/rrader/aio_manager.git@6a0d25aab04802a4927dbdeca65d10514ac04e45#egg=aio_manager-master
 aiohttp==0.17.4
 aiohttp-jinja2==0.5.0
--e git://github.com/rrader/aiopg.git@metadata#egg=aiopg
+-e git://github.com/rrader/aiopg.git@413ad5b5e379f8d34c4859827f149f887a6fad40#egg=aiopg-origin_metadata
 alembic==0.8.3
 chardet==2.3.0
 colorama==0.3.3
@@ -16,8 +16,10 @@ pexpect==4.0.1
 pickleshare==0.5
 psycopg2==2.6.1
 ptyprocess==0.5
+python-dateutil==2.4.2
 python-editor==0.4
 simplegeneric==0.8.1
+six==1.10.0
 SQLAlchemy==1.0.8
 trafaret==0.5.4
 traitlets==4.0.0

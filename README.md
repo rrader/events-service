@@ -1,1 +1,1 @@
-# aiohttp-boilerplate
+# events storage service
