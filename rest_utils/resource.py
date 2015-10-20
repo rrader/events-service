@@ -118,7 +118,7 @@ class ModelBaseResource(BaseResource):
 
     @property
     def pluralname(self):
-        return self.model.__name__.lower() + "s"
+        return self.singlename + "s"
 
     @property
     def validator(self):

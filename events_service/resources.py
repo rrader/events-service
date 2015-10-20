@@ -1,5 +1,4 @@
 import asyncio
-import trafaret as t
 from rest_utils.resource import ModelResource
 from events_service.models import Event
 
