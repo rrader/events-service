@@ -1,7 +1,7 @@
--e git://github.com/rrader/aio_manager.git@6a0d25aab04802a4927dbdeca65d10514ac04e45#egg=aio_manager-master
+-e git://github.com/rrader/aio_manager.git@master#egg=aio_manager
 aiohttp==0.17.4
 aiohttp-jinja2==0.5.0
--e git://github.com/rrader/aiopg.git@413ad5b5e379f8d34c4859827f149f887a6fad40#egg=aiopg-origin_metadata
+-e git://github.com/rrader/aiopg.git@metadata#egg=aiopg
 alembic==0.8.3
 chardet==2.3.0
 colorama==0.3.3
@@ -24,3 +24,4 @@ SQLAlchemy==1.0.8
 trafaret==0.5.4
 traitlets==4.0.0
 wheel==0.24.0
+setuptools==18.4

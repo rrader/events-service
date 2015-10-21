@@ -1,12 +1,11 @@
 import asyncio
 from aiopg.sa import AsyncMetaData
-from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 
 from aiopg.sa import create_engine
-from events_service.settings import DATABASE_HOST, DATABASE_PASSWORD,\
-    DATABASE_NAME, DATABASE_USERNAME
-
+from events_service.settings import DATABASE_URL
+from sqlalchemy.orm import relationship
 
 metadata = AsyncMetaData()
 Base = declarative_base(metadata=metadata)
@@ -33,14 +32,20 @@ class Event(Base):
     special = Column(Boolean(), default=False,
                      doc='This event should be rendered in special way',
                      nullable=False)
+    provider = Column(Integer, ForeignKey('provider.id'), nullable=False)
+
+
+class EventsProvider(Base):
+    __tablename__ = 'provider'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(256), nullable=False)
+    events = relationship('Event')
 
 
 @asyncio.coroutine
 def setup(app):
-    engine = yield from create_engine(user=DATABASE_USERNAME,
-                                      database=DATABASE_NAME,
-                                      host=DATABASE_HOST,
-                                      password=DATABASE_PASSWORD)
+    engine = yield from create_engine(DATABASE_URL)
     app['db_engine'] = engine
     app['db_declarative_base'] = Base
     metadata.bind = engine
