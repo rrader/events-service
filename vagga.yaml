@@ -3,7 +3,7 @@ containers:
     setup:
     - !Ubuntu trusty
     - !UbuntuUniverse
-    - !Install [libpq-dev, ca-certificates, git]
+    - !Install [libpq-dev, ca-certificates, git, ssh]
     - !Py3Requirements requirements.txt
     environ: {DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5433/vaggadb}
 
@@ -35,6 +35,7 @@ commands:
             touch /work/.tmp.dbcreation.lock
             while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
             alembic upgrade head
+            python3 manage.py run_server
 
       db: !Command
         container: postgres
@@ -43,7 +44,7 @@ commands:
             su postgres -c "$PG_BIN/pg_ctl initdb";
             su postgres -c "echo 'host all all all trust' >> $PGDATA/pg_hba.conf"
             su postgres -c "$PG_BIN/postgres -F --port=$PG_PORT -h 127.0.0.1 -k /tmp" &
-            sleep 2
+            sleep 1
             su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"CREATE USER $PG_USER WITH PASSWORD '$PG_PASSWORD';\""
             su postgres -c "$PG_BIN/createdb -h 127.0.0.1 -p $PG_PORT $PG_DB -O $PG_USER";
             rm -f /work/.tmp.dbcreation.lock
