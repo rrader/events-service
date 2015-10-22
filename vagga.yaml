@@ -1,5 +1,5 @@
 containers:
-  service:
+  events_service:
     setup:
     - !Ubuntu trusty
     - !UbuntuUniverse
@@ -30,7 +30,7 @@ commands:
     description: Run app
     children:
       service: !Command
-        container: service
+        container: events_service
         run: |
             touch /work/.tmp.dbcreation.lock
             while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
