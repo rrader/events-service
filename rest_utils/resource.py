@@ -1,6 +1,6 @@
 import asyncio
 import json
-import http
+import http.client
 from abc import ABCMeta, abstractmethod
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPBadRequest, HTTPNotFound
@@ -151,7 +151,7 @@ class CreateModelMixin(CreateMixin):
             )
             created_id = yield from results.scalar()
         response = web.Response(
-               status=http.HTTPStatus.CREATED.value)
+               status=http.client.CREATED)
         if hasattr(self, 'get_routename'):
             created_path = self.app.router[self.get_routename].\
                 url(parts={'ident': created_id})
@@ -177,7 +177,7 @@ class RetrieveModelMixin(RetrieveMixin):
         data = json.dumps(instance).encode()
         return JSONResponse(
                data,
-               status=http.HTTPStatus.OK.value)
+               status=http.client.OK)
 
     @property
     def get_routename(self):
@@ -213,7 +213,7 @@ class ListModelMixin(ListMixin):
             data.update({'next': next_url})
         return JSONResponse(
                data,
-               status=http.HTTPStatus.OK.value)
+               status=http.client.OK)
 
     @property
     def list_routename(self):
