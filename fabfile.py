@@ -13,7 +13,7 @@ def prepare_packages():
 
 
 @task
-def build_container(name):
+def build_container(name, microservice):
     require_vagga()
     require_packages('git')
 
@@ -23,14 +23,15 @@ def build_container(name):
     run('mkdir -p {}'.format(build_path))
     with cd(build_path):
         run('git clone {} .'.format(REPO))
-        run('vagga _build {}'.format(name))
-        rootfs = run('readlink -f .vagga/{}'.format(name))
-        run('cp -R * .vagga/{}/work/'.format(name))
-        run('tar zcf {}.tar.gz -C {} ./'.format(name, rootfs))
+        with cd(microservice):
+            run('vagga _build {}'.format(name))
+            rootfs = run('readlink -f .vagga/{}'.format(name))
+            run('cp -R * .vagga/{}/work/'.format(name))
+            run('tar zcf {}.tar.gz -C {} ./'.format(name, rootfs))
 
 
 @task
-def deploy_last_container(name):
+def deploy_last_container(name, microservice):
     path = get_build_path(name)
     version = get_container_version(name) + 1
     target_path = '{}/{}/{}'.format(BASE_TARGET_PATH, name, version)
@@ -40,7 +41,7 @@ def deploy_last_container(name):
         run('rm -rf {}'.format(target_path))
     run('mkdir -p {}'.format(target_path))
 
-    run('tar xf {}/{}.tar.gz -C {}'.format(path, name, target_path))
+    run('tar xf {}/{}/{}.tar.gz -C {}'.format(path, microservice, name, target_path))
     run('rm -f {}'.format(current_path))
     run('ln -sf {} {}'.format(target_path, current_path))
 
@@ -48,16 +49,20 @@ def deploy_last_container(name):
 
 
 @task
-def deploy_container(name):
-    build_container(name)
-    deploy_last_container(name)
+def deploy_container(name, microservice):
+    build_container(name, microservice)
+    deploy_last_container(name, microservice)
 
 
 @task
-def deploy():
-    deploy_container('postgres')
-    deploy_container('events_service')
+def deploy_postgres():
+    deploy_container('postgres', '_events')
     run('systemctl restart systemd-nspawn@postgres.service; sleep 3')
+
+
+@task
+def deploy_events():
+    deploy_container('events_service', '_events')
     run('systemctl restart systemd-nspawn@events_service.service')
 
 
