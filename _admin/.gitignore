@@ -60,3 +60,12 @@ tmp
 .idea
 .vagga
 venv
+
+
+
+# Static
+static/libs/*
+
+local.cfg
+data.sqlite
+

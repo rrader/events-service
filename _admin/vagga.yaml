@@ -1,0 +1,78 @@
+containers:
+  admin_service:
+    setup:
+    - !Ubuntu trusty
+    - !UbuntuUniverse
+    - !Install [libpq-dev, ca-certificates, git, ssh]
+    - !Py3Requirements requirements.txt
+    environ: {DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5433/vaggadb}
+
+  postgres:
+    setup:
+    - !Ubuntu trusty
+    - !Install [postgresql]
+    - !Sh |
+       mkdir -p /data
+    environ:
+      PG_PORT: 5433
+      PG_DB: vaggadb
+      PG_USER: vaggauser
+      PG_PASSWORD: password
+      PGDATA: /data
+      PG_BIN: /usr/lib/postgresql/9.3/bin
+    volumes:
+      /data: !Tmpfs
+        size: 100M
+        mode: 0o700
+
+  redis:
+    setup:
+    - !Alpine v3.2
+    - !Install [redis]
+
+  nodejs:
+    setup:
+    - !Alpine v3.2
+    - !Install [git]
+    - !NpmInstall [bower]
+    environ:
+      HOME: /tmp
+
+
+commands:
+  setup: !Command
+    container: nodejs
+    run: |
+        cd static && bower install --allow-root --config.interactive=false
+
+  run: !Supervise
+    description: Run app
+    children:
+      service: !Command
+        container: admin_service
+        run: |
+            touch /work/.tmp.dbcreation.lock
+            while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
+            python3 manage.py runserver -h 0.0.0.0 -d -r
+
+      celery: !Command
+        container: admin_service
+        run: |
+            python3 celery_run.py worker
+
+      db: !Command
+        container: postgres
+        run: |
+            chown postgres:postgres $PGDATA;
+            su postgres -c "$PG_BIN/pg_ctl initdb";
+            su postgres -c "echo 'host all all all trust' >> $PGDATA/pg_hba.conf"
+            su postgres -c "$PG_BIN/postgres -F --port=$PG_PORT -h 127.0.0.1 -k /tmp" &
+            sleep 1
+            su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"CREATE USER $PG_USER WITH PASSWORD '$PG_PASSWORD';\""
+            su postgres -c "$PG_BIN/createdb -h 127.0.0.1 -p $PG_PORT $PG_DB -O $PG_USER";
+            rm -f /work/.tmp.dbcreation.lock
+            wait
+
+      redis: !Command
+        container: redis
+        run: "redis-server --daemonize no"
