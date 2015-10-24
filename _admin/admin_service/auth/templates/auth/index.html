@@ -2,16 +2,26 @@
 {% set page_title = _('Login') %}
 
 {% block content %}
-<h1>{{ _("Social login") }}</h1>
-<p>{{ _("Login using your favorite social service ")}}</p>
-{% from 'auth/macros.html' import login_button with context %}
-<div class="well">
-{# {{ login_button(provider='google-oauth2') }}
-{{ login_button(provider='twitter') }}
-{{ login_button(provider='facebook') }}
-{{ login_button(provider='yahoo-oauth') }} #}
-{{ login_button(provider='github') }}
-</div>
+<h1>{{ _("Login") }}</h1>
 
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+<form method="POST">
+    <ul>
+        <li>
+            <label>Username</label>
+            <input type="text" name="username">
+        </li>
+        <li>
+            <label>Password</label>
+            <input type="password" name="password">
+        </li>
+        <li>
+            <input type="submit" class="button-green" value="Login">
+        </li>
+    </ul>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+</form>
 {% endblock %}
-

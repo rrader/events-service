@@ -1,24 +1,39 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, render_template, redirect, request, current_app, g, flash, url_for
-from flask.ext.login import login_required, logout_user
+from flask.ext.login import login_required, logout_user, login_user
 from flask.ext.babel import gettext as _
-from .models import User
+from sqlalchemy.orm.exc import NoResultFound
+from admin_service.auth.utils import hash_password, admin_required
+from .models import User, Team
 from ..extensions import db
 from .forms import SettingsForm
+import trafaret as t
+from trafaret.extras import KeysSubset
+
 
 auth = Blueprint('auth', __name__, url_prefix='/auth/', template_folder="templates")
 
 
-@auth.route('login')
+@auth.route('login', methods=['GET', 'POST'])
 def login():
-    next_url = request.args.get('next') or request.referrer or None
-    return render_template('auth/index.html', next=next_url)
+    errors = []
+    if request.method == 'POST':
+        errors += do_login()
+        if not errors:
+            return redirect(url_for('auth.profile'))
+    return render_template('auth/index.html', errors=errors)
 
 
-@auth.route('loggedin')
-def loggedin():
-    return redirect(request.args.get('next') or url_for('frontend.index'))
+def do_login():
+    try:
+        user = User.query.filter(User.username == request.form['username']).one()
+    except NoResultFound:
+        return ['User not found']
+    if user.password != hash_password(request.form['password']):
+        return ['Wrong password']
+    login_user(user)
+    return []
 
 
 @auth.route('profile')
@@ -27,33 +42,108 @@ def profile():
     return render_template('auth/profile.html')
 
 
-@auth.route('set_lang')
-@login_required
-def set_lang():
-    if request.args.get('lang') in current_app.config['LANGUAGES']:
-        user = User.query.get_or_404(g.user.id)
-        user.ui_lang = request.args.get('lang')
-        db.session.add(user)
-        db.session.commit()
-    return redirect('/')
-
-
-@auth.route('settings', methods=['GET', 'POST'])
-@login_required
-def settings():
-    form = SettingsForm(request.form, g.user)
-    form.ui_lang.choices = current_app.config['LANGUAGES'].items()
-
-    if form.validate_on_submit():
-        form.populate_obj(g.user)
-        db.session.add(g.user)
-        db.session.commit()
-        flash(_("Settings saved"))
-
-    return render_template('auth/settings.html', languages=current_app.config['LANGUAGES'], form=form)
-
-
 @auth.route('logout')
 def logout():
     logout_user()
     return redirect('/')
+
+
+@auth.route('teams')
+@login_required
+@admin_required
+def teams():
+    teams = Team.query.all()
+    return render_template('auth/teams.html', teams=teams)
+
+
+@auth.route('teams/<id_>')
+@login_required
+@admin_required
+def team(id_):
+    team = Team.query.get(id_)
+    return render_template('auth/team.html', team=team)
+
+
+@auth.route('teams/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_team():
+    g.errors = []
+    if request.method == 'POST':
+        team = do_create_team()
+        if not g.errors:
+            return redirect(url_for('auth.team', id_=team.id))
+    return render_template('auth/team_create.html', errors=g.errors)
+
+
+TEAM_CREATION_FORM = t.Dict({'name': t.String}).ignore_extra('_csrf_token')
+
+
+def do_create_team():
+    try:
+        data = TEAM_CREATION_FORM.check(request.form.to_dict())
+    except t.DataError as e:
+        g.errors += ['{}: {}'.format(key, value)
+                     for key, value in e.error.items()]
+        return
+    sess = db.session()
+    team = Team(**data)
+    sess.add(team)
+    sess.commit()
+    return team
+
+
+@auth.route('user/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_user():
+    g.errors = []
+    if request.method == 'POST':
+        user = do_create_user()
+        if not g.errors:
+            return redirect(url_for('auth.team', id_=user.team_id))
+    default_team = request.args.get('team')
+    if default_team is not None:
+        default_team = int(default_team)
+    return render_template('auth/user_create.html', errors=g.errors,
+                           teams=Team.query.all(),
+                           default_team=default_team)
+
+
+USER_CREATION_FORM = t.Dict({
+                             'username': t.String >>
+                                 (lambda username:
+                                  username
+                                  if not db.session().query(
+                                  User.query.filter(User.username == username).exists()).scalar()
+                                  else t.DataError('User with same username is already exists')),
+                             'name': t.String,
+                             'email': t.Email,
+                             'team': t.Int >>
+                                 (lambda team_id:
+                                  Team.query.get(team_id)
+                                  if db.session().query(
+                                     Team.query.filter(Team.id == team_id).exists()).scalar()
+                                  else t.DataError('Team does not exists')
+                                  ),
+                             KeysSubset('password1', 'password2'):
+                                 (lambda x:
+                                  {'password': hash_password(x['password1'])
+                                   if x['password1'] == x['password2']
+                                   else t.DataError('Passwords does not match')
+                                   })
+                             }).ignore_extra('_csrf_token')
+
+
+def do_create_user():
+    try:
+        data = USER_CREATION_FORM.check(request.form.to_dict())
+    except t.DataError as e:
+        g.errors += ['{}: {}'.format(key, value)
+                     for key, value in e.error.items()]
+        return
+    sess = db.session()
+    user = User(**data)
+    sess.add(user)
+    sess.commit()
+    return user

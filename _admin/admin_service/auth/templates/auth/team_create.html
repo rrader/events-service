@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% set page_title = _('Teams Management') %}
+
+{% block content %}
+<h1>{{ _("Add team") }}</h1>
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+<form class="grid-form" method="POST">
+    <fieldset>
+        <legend>Team Details</legend>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Team Name</label>
+                <input type="text" name="name">
+            </div>
+        </div>
+        <br>
+        <input type="submit" class="button-green bigger" value="Add Team">
+    </fieldset>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+</form>
+{% endblock %}

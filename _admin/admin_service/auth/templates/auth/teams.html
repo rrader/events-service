@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set page_title = _('Teams Management') %}
+
+{% block content %}
+<h1>{{ _("Teams") }}</h1>
+
+<div class="flakes-actions-bar">
+    <a class="action button-gray smaller right" href="{{ url_for('auth.create_team') }}">Add team</a>
+
+    <!--<a class="action button-gray smaller" href="">Delete</a>-->
+</div>
+
+<table class="flakes-table">
+    <thead>
+        <tr>
+            <td class="name">Team name</td>
+        </tr>
+    </thead>
+    <tbody class="list">
+        {% for team in teams %}
+            <tr>
+              <td><a href="{{ url_for('auth.team', id_=team.id) }}">{{ team.name }}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

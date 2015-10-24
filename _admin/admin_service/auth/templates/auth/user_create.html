@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set page_title = _('Teams Management') %}
+
+{% block content %}
+<h1>{{ _("Create user") }}</h1>
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+<form class="grid-form" method="POST">
+    <fieldset>
+        <legend>User Details</legend>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Username</label>
+                <input type="text" name="username">
+            </div>
+            <div data-field-span="1">
+                <label>Name</label>
+                <input type="text" name="name">
+            </div>
+        </div>
+        <div data-row-span="2">
+            <div data-field-span="1">
+                <label>Password</label>
+                <input type="password" name="password1">
+            </div>
+            <div data-field-span="1">
+                <label>Repeat password</label>
+                <input type="password" name="password2">
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Email</label>
+                <input type="text" name="email">
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Team</label>
+                <select name="team">
+                    {% for team in teams %}
+                        <option {% if team.id == default_team %}selected{% endif %}
+                                value="{{team.id}}">
+                            {{ team.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <!--<input type="text" name="team">-->
+            </div>
+        </div>
+        <br>
+        <input type="submit" class="button-green bigger" value="Create User">
+    </fieldset>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+</form>
+{% endblock %}

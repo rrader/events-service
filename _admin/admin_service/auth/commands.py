@@ -1,5 +1,5 @@
 from _md5 import md5
-from flask_script import Command, Manager, prompt_pass
+from flask_script import Command, Manager, prompt_pass, Option
 from flask import current_app
 from admin_service.auth.models import Team, User
 from admin_service.auth.utils import hash_password
@@ -9,14 +9,21 @@ AuthCommand = Manager(usage='Auth tools')
 
 
 class CreateAdmin(Command):
-    def run(self):
+
+    def get_options(self):
+        return (
+            Option('--password',
+                   dest='password',
+                   default='1111'),
+        )
+
+    def run(self, password):
         team = self.get_team()
 
         sess = db.session()
         has_admin = sess.query(User.query.filter(User.username == 'admin').
                                exists()).scalar()
         if not has_admin:
-            password = prompt_pass("password")
             user = User(username='admin', password=hash_password(password),
                         admin=True, team_id=team.id)
             sess.add(user)
