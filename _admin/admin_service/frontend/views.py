@@ -14,7 +14,7 @@ frontend = Blueprint('frontend', __name__, template_folder="templates")
 @frontend.route('/')
 def index():
     # Run background task inside of view
-    do_some_stuff.delay()
+    # do_some_stuff.delay()
     return render_template('frontend/index.html')
 
 

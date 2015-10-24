@@ -2,7 +2,7 @@
   "name": "vmstatic",
   "private": true,
   "dependencies": {
-    "bootstrap": "*",
+    "flakes": "*",
     "jquery": "*",
     "font-awesome": "*"
   },

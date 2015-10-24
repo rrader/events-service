@@ -69,3 +69,4 @@ static/libs/*
 local.cfg
 data.sqlite
 
+*.rdb

@@ -40,11 +40,6 @@ containers:
 
 
 commands:
-  setup: !Command
-    container: nodejs
-    run: |
-        cd static && bower install --allow-root --config.interactive=false
-
   run: !Supervise
     description: Run app
     children:
@@ -75,4 +70,9 @@ commands:
 
       redis: !Command
         container: redis
-        run: "redis-server --daemonize no"
+        run: "redis-server --daemonize no --bind 127.0.0.1"
+
+  setup: !Command
+    container: nodejs
+    run: |
+        cd static && bower install --allow-root --config.interactive=false

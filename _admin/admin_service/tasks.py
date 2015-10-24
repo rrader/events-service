@@ -4,10 +4,12 @@ from celery.signals import task_postrun
 
 from .extensions import celery, db
 
+
 @celery.task(ignore_result=True)
 def do_some_stuff():
     current_app.logger.info("I have the application context")
-    #you can now use the db object from extensions
+    # you can now use the db object from extensions
+
 
 @task_postrun.connect
 def close_session(*args, **kwargs):
