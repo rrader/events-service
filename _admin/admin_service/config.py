@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
+import os
+from urllib.parse import urlparse
 
 DEBUG = True
-SECRET_KEY = 'change me please'
+SECRET_KEY = b'hello 42'
 
 from os.path import dirname, abspath, join
-SQLALCHEMY_DATABASE_URI = 'sqlite:////%s/data.sqlite' % dirname(abspath(__file__))
 SQLALCHEMY_ECHO = True
+
+default_db = 'sqlite:////%s/data.sqlite' % dirname(abspath(__file__))
+SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', default_db)
 
 # flatpages
 FLATPAGES_EXTENSION = '.md'
 FLATPAGES_ROOT = join(dirname(__file__), 'docs')
-del dirname, abspath, join
+del dirname, abspath, join, os, urlparse
 
 # default babel values
 BABEL_DEFAULT_LOCALE = 'en'

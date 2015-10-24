@@ -1,5 +1,5 @@
-title: Page title
+title: About ED
 
 # About the project
 
-Welcome to our new Flask site.
+Events Driver is "IT KPI Mail Generation Engine" version 2.0

@@ -14,15 +14,10 @@ from .frontend import frontend
 from .auth import auth
 from .api import api, initialize_api
 
-from social.apps.flask_app.routes import social_auth
-from social.apps.flask_app.default.models import init_social
-from social.apps.flask_app.template_filters import backends
-
 __all__ = ('create_app', 'create_celery', )
 
 BLUEPRINTS = (
     frontend,
-    social_auth,
     auth,
     api
 )
@@ -77,7 +72,6 @@ def extensions_fabrics(app):
     mail.init_app(app)
     babel.init_app(app)
     pages.init_app(app)
-    init_social(app, db)
     login_manager.init_app(app)
     manager.init_app(app, db)
     migrate.init_app(app, db)
@@ -116,8 +110,6 @@ def gvars(app):
             g.debug = True
         else:
             g.debug = False
-
-    app.context_processor(backends)
 
     from .models import User
 

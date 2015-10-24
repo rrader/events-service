@@ -11,6 +11,7 @@ from admin_service.extensions import db
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.serializer import dumps, loads
+from admin_service.auth.commands import AuthCommand
 
 manager = Manager(create_app)
 
@@ -18,6 +19,7 @@ manager = Manager(create_app)
 # $ python manage.py db init
 # $ python manage.py db migrate
 manager.add_command('db', MigrateCommand)
+manager.add_command('auth', AuthCommand)
 
 
 @manager.command

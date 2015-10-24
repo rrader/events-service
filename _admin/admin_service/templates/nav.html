@@ -1,18 +1,23 @@
 <div class="flakes-navigation">
     <a href="index.html" class="logo">
-        <img src="{{ url_for('static', filename='libs/flakes/img/logo.png') }}" width="120">
+        <!--<img src="{{ url_for('static', filename='libs/flakes/img/logo.png') }}" width="120">-->
     </a>
 
     <ul>
-        <li class="title">Category Title</li>
-        <li><a href="#">Nav Item 1</a></li>
-        <li><a href="#">Nav Item 2</a></li>
-        <li><a href="#">Nav Item 3</a></li>
-        <li><a href="#">Nav Item 4</a></li>
+        <li class="title">Applications</li>
+        <li><a href="#">Events Database</a></li>
+        <li><a href="#">Digest Monkey</a></li>
+        <li><a href="#">Calendar</a></li>
+        <li><a href="{{ url_for('frontend.page') }}">{{ _("About Site ") }}</a></li>
     </ul>
 
-    <p class="foot">
-        Hello <b>John Doe</b><br>
-        <a href="">My Account</a> &bullet; <a href="">Logout</a>
-    </p>
+    <ul>
+      <li class="title">Accounts</li>
+      {% if user.is_authenticated %}
+      <li><a href="{{ url_for('auth.settings') }}">{{ _("Settings")}}</a></li>
+      <li><a href="{{ url_for('auth.logout') }}" data-confirm="{{ _('Do you want to logout?')}}" data-title="{{ _('Logout?') }}"><i class="fa fa-sign-out"></i> {{ _("Logout") }}</a></li>
+      {% else %}
+      <li><a href="{{ url_for('auth.login') }}"> {{ _("Login") }} </a></li>
+      {% endif %}
+    </ul>
 </div>

@@ -48,6 +48,7 @@ commands:
         run: |
             touch /work/.tmp.dbcreation.lock
             while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
+            python3 manage.py db migrate
             python3 manage.py runserver -h 0.0.0.0 -d -r
 
       celery: !Command
