@@ -24,6 +24,14 @@ class ColumnScissors:
         return t.StrBool(**kwargs)
 
     def cut(self, column):
+        cut_method = 'cut_{}'.format(column.name)
+        if hasattr(self, cut_method):
+            trafaret = getattr(self, cut_method)(column)
+        else:
+            trafaret = self.default_cut(column)
+        return trafaret
+
+    def default_cut(self, column):
         if isinstance(column.type, sqlalchemy.sql.sqltypes.Enum):
             trafaret = self._enum_col(column)
         elif isinstance(column.type, sqlalchemy.sql.sqltypes.String):
@@ -55,6 +63,8 @@ class ModelValidator(ColumnScissors):
             key_opts['optional'] = column.nullable
             key = t.Key(column.name, **key_opts)
             trafaret = self.cut(column)
+            if not trafaret:
+                continue
             if column.nullable:
                 trafaret |= t.Null()
             fields[key] = trafaret

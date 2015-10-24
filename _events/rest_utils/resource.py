@@ -3,7 +3,7 @@ import json
 import http.client
 from abc import ABCMeta, abstractmethod
 from aiohttp import web
-from aiohttp.web_exceptions import HTTPBadRequest, HTTPNotFound
+from aiohttp.web_exceptions import HTTPBadRequest, HTTPNotFound, HTTPForbidden
 from trafaret import DataError
 from rest_utils.response import JSONResponse
 from rest_utils.validator import ModelValidator, ModelSerializer
@@ -78,6 +78,7 @@ class ModelBaseResource(BaseResource):
     model = None
     trafaret_in = None
     trafaret_out = None
+    permissions = []
 
     def register(self):
         if self.model is None:
@@ -104,10 +105,10 @@ class ModelBaseResource(BaseResource):
         return instance
 
     @asyncio.coroutine
-    def get_instance(self, ident):
+    def get_instance(self, request, ident):
         with (yield from self.get_engine()) as conn:
             result = yield from conn.execute(
-                self.base_query.where(self.lookup_key == ident)  # TODO: via metadata??
+                self.base_query(request).where(self.lookup_key == ident)  # TODO: via metadata??
             )
             instance = yield from result.fetchone()
         return instance
@@ -130,26 +131,27 @@ class ModelBaseResource(BaseResource):
 
     list_serializer = serializer
 
-    @property
-    def base_query(self):
+    def base_query(self, request):
         return self.model.__table__.select()
 
     @property
     def lookup_key(self):
         return self.model.__table__.c.id  # TODO: go through columns and find primary key
 
+    @asyncio.coroutine
+    def check_permissions(self, request):
+        if not all(p.check(request) for p in self.permissions):
+            raise HTTPForbidden()
+
 
 class CreateModelMixin(CreateMixin):
     @asyncio.coroutine
     def create(self, request):
+        yield from self.check_permissions(request)
         data = yield from request.json()
         data = self.validate(data)
 
-        with (yield from self.get_engine()) as conn:
-            results = yield from conn.execute(
-                self.model.__table__.insert().values(**data)
-            )
-            created_id = yield from results.scalar()
+        created_id = yield from self.perform_create(request, data)
         response = web.Response(
                status=http.client.CREATED)
         if hasattr(self, 'get_routename'):
@@ -159,6 +161,15 @@ class CreateModelMixin(CreateMixin):
             response.headers.extend({'Location': location})
         return response
 
+    @asyncio.coroutine
+    def perform_create(self, request, data):
+        with (yield from self.get_engine()) as conn:
+            results = yield from conn.execute(
+                self.model.__table__.insert().values(**data)
+            )
+            created_id = yield from results.scalar()
+        return created_id
+
     @property
     def create_routename(self):
         return '{}-create'.format(self.singlename)
@@ -167,8 +178,9 @@ class CreateModelMixin(CreateMixin):
 class RetrieveModelMixin(RetrieveMixin):
     @asyncio.coroutine
     def get(self, request):
+        yield from self.check_permissions(request)
         ident = request.match_info['ident']
-        instance = yield from self.get_instance(ident)
+        instance = yield from self.get_instance(request, ident)
 
         if not instance:
             raise HTTPNotFound(text=json.dumps({'id': ident}))
@@ -189,9 +201,10 @@ class ListModelMixin(ListMixin):
 
     @asyncio.coroutine
     def list(self, request):
+        yield from self.check_permissions(request)
         offset = int(request.GET.get('offset', 0))
         limit = int(request.GET.get('count', self.page_size))
-        query = self.base_query.offset(offset).limit(limit + 1)
+        query = self.base_query(request).offset(offset).limit(limit + 1)
         with (yield from self.get_engine()) as conn:
             result = yield from conn.execute(query)
             instances = yield from result.fetchall()
@@ -218,7 +231,6 @@ class ListModelMixin(ListMixin):
     @property
     def list_routename(self):
         return '{}-list'.format(self.singlename)
-
 
 
 class ModelResource(CreateModelMixin,

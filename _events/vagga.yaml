@@ -5,7 +5,7 @@ containers:
     - !UbuntuUniverse
     - !Install [libpq-dev, ca-certificates, git, ssh]
     - !Py3Requirements requirements.txt
-    environ: {DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5433/vaggadb}
+    environ: {DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5434/vaggadb}
 
   postgres:
     setup:
@@ -14,7 +14,7 @@ containers:
     - !Sh |
        mkdir -p /data
     environ:
-      PG_PORT: 5433
+      PG_PORT: 5434
       PG_DB: vaggadb
       PG_USER: vaggauser
       PG_PASSWORD: password
@@ -35,6 +35,8 @@ commands:
             touch /work/.tmp.dbcreation.lock
             while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
             alembic upgrade head
+            python3 manage.py add_provider TEST1 --key 424242
+            python3 manage.py add_provider TEST2 --key 434343
             python3 manage.py run_server
 
       db: !Command

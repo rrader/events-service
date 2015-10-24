@@ -40,6 +40,7 @@ class EventsProvider(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(256), nullable=False)
+    key = Column(String(256), nullable=False)
     events = relationship('Event')
 
 
