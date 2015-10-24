@@ -14,12 +14,14 @@
     <thead>
         <tr>
             <td class="name">Team name</td>
+            <td>Events Token</td>
         </tr>
     </thead>
     <tbody class="list">
         {% for team in teams %}
             <tr>
               <td><a href="{{ url_for('auth.team', id_=team.id) }}">{{ team.name }}</a></td>
+              <td>{{ team.events_token }}</td>
             </tr>
         {% endfor %}
     </tbody>

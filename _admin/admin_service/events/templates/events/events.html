@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block content %}
+<h1>{{ _("Events") }}</h1>
+
+<div class="flakes-actions-bar">
+    <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
+
+    <!--<a class="action button-gray smaller" href="">Delete</a>-->
+</div>
+
+<table class="flakes-table">
+    <thead>
+        <tr>
+            <td class="name">Title</td>
+            <td>When</td>
+        </tr>
+    </thead>
+    <tbody class="list">
+        {% for event in events_data.events %}
+            <tr>
+              <td><a href="#">{{ event.title }}</a></td>
+              <td>{{ event.when_start|strftime }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="flakes-actions-bar">
+    pages
+    {% if offset > 0 %}
+        <a href="{{ url_for('events.events_list') }}?offset=0&count={{ count }}">&Lt;</a>
+        <a href="{{ url_for('events.events_list') }}?offset={{ offset - count }}&count={{ count }}">&lt; {{ page-1 }}</a>
+    {% endif %}
+    <a href="{{ url_for('events.events_list') }}?offset={{ offset }}&count={{ count }}">{{page}}</a>
+    {% if events_data.has_next %}
+        <a href="{{ url_for('events.events_list') }}?offset={{ offset + count }}&count={{ count }}">{{ page + 1 }} &gt;</a>
+    {% endif %}
+</div>
+{% endblock %}

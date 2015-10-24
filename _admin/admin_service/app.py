@@ -2,9 +2,11 @@
 #pylint:disable-msg=W0612
 
 import os
+import dateutil
 from flask import Flask, request, render_template, g
 from flask.ext import login
 from celery import Celery
+from admin_service.events.client import EventsServiceAPI
 
 from .extensions import (db, mail, pages, manager, login_manager, babel,
     migrate, csrf, celery)
@@ -43,6 +45,7 @@ def create_app(config=None, app_name='admin_service', blueprints=None):
     extensions_fabrics(app)
     api_fabrics()  # this must be called after extensions_fabrics
     configure_logging(app)
+    template_filters(app)
 
     error_pages(app)
     gvars(app)
@@ -106,6 +109,10 @@ def error_pages(app):
 
 
 def gvars(app):
+    @app.before_first_request
+    def events_api():
+        app.events_api = EventsServiceAPI(app.config['EVENTS_SERVICE_URL'])
+
     @app.before_request
     def gdebug():
         if app.debug:
@@ -183,3 +190,12 @@ def configure_logging(app):
         '[in %(pathname)s:%(lineno)d]')
     )
     app.logger.addHandler(mail_handler)
+
+
+def template_filters(app):
+    @app.template_filter('strftime')
+    def _jinja2_filter_datetime(date, fmt=None):
+        date = dateutil.parser.parse(date)
+        native = date.replace(tzinfo=None)
+        format='%b %d, %Y'
+        return native.strftime(format)

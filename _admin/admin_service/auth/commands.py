@@ -3,6 +3,7 @@ from flask_script import Command, Manager, prompt_pass, Option
 from flask import current_app
 from admin_service.auth.models import Team, User
 from admin_service.auth.utils import hash_password
+from admin_service.events.client import EventsServiceAPI
 from admin_service.extensions import db
 
 AuthCommand = Manager(usage='Auth tools')
@@ -37,7 +38,8 @@ class CreateAdmin(Command):
                                       exists()).scalar()
         if not has_default_team:
             print("Creating default Team")
-            team = Team(name='default')
+            team = Team(name='default',
+                        events_token='424242')
             sess.add(team)
             sess.commit()
         else:

@@ -14,7 +14,6 @@ SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', default_db)
 # flatpages
 FLATPAGES_EXTENSION = '.md'
 FLATPAGES_ROOT = join(dirname(__file__), 'docs')
-del dirname, abspath, join, os, urlparse
 
 # default babel values
 BABEL_DEFAULT_LOCALE = 'en'
@@ -64,3 +63,9 @@ SOCIAL_AUTH_AUTHENTICATION_BACKENDS = (
 SOCIAL_AUTH_GITHUB_KEY = '8b643b3f60a3dd4470e7'
 SOCIAL_AUTH_GITHUB_SECRET = '3e07a41b69244ec209db690e1babab3ca1d33291'
 SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
+
+default_events_service = 'http://127.0.0.1:5000'
+EVENTS_SERVICE_URL = os.environ.get('EVENTS_SERVICE_URL',
+                                    default_events_service)
+
+del dirname, abspath, join, urlparse, os

@@ -50,7 +50,7 @@ commands:
             while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
             python3 manage.py db upgrade
             python3 manage.py auth create_admin --password 1111
-            python3 manage.py runserver -h 0.0.0.0 -d -r
+            python3 manage.py runserver -h 0.0.0.0 -p 5001 -d -r
 
       celery: !Command
         container: admin_service

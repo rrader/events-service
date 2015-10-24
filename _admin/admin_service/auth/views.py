@@ -86,6 +86,8 @@ def do_create_team():
         g.errors += ['{}: {}'.format(key, value)
                      for key, value in e.error.items()]
         return
+    events_key = current_app.events_api.register_provider(data['name'])
+    data['events_token'] = events_key
     sess = db.session()
     team = Team(**data)
     sess.add(team)
