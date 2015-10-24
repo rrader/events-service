@@ -152,13 +152,20 @@ class CreateModelMixin(CreateMixin):
         data = self.validate(data)
 
         created_id = yield from self.perform_create(request, data)
-        response = web.Response(
-               status=http.client.CREATED)
         if hasattr(self, 'get_routename'):
+            response = web.Response(
+               status=http.client.CREATED)
             created_path = self.app.router[self.get_routename].\
                 url(parts={'ident': created_id})
             location = "{}://{}{}".format(request.scheme, request.host, created_path)
             response.headers.extend({'Location': location})
+        else:
+            instance = yield from self.get_instance(request, created_id)
+            data = self.serialize(dict(instance))
+            data.pop('id')  # anyway retrieve method is not allowed
+            response = JSONResponse(
+                data,
+                status=http.client.CREATED)
         return response
 
     @asyncio.coroutine
