@@ -7,6 +7,7 @@ from flask import (Blueprint, render_template, g, request, url_for,
 from flask.ext.login import login_required
 
 from ..extensions import pages, csrf
+import trafaret as t
 
 events = Blueprint('events', __name__, url_prefix='/events/', template_folder="templates")
 
@@ -27,16 +28,38 @@ def events_list():
                            page=page)
 
 
+EVENT_CREATION_FORM = t.Dict({
+                             'title': t.String,
+                             'agenda': t.String,
+                             'social': t.String(allow_blank=True),
+                             'place': t.String(allow_blank=True),
+                             'registration_url': t.URL(allow_blank=True),
+                             'image_url': t.URL(allow_blank=True),
+                             'level': t.Enum('NONE', 'TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR'),
+                             t.Key('special', default=False): t.StrBool,
+                             'when_start': t.String,
+                             'when_end': t.String(allow_blank=True),
+                             t.Key('include_time', default=False): t.StrBool,
+                            }).ignore_extra('_csrf_token')
+
+
 @events.route('event/create', methods=['GET', 'POST'])
 @login_required
 def create_event():
     g.errors = []
     if request.method == 'POST':
-        user = do_create_event()
+        do_create_event()
         if not g.errors:
-            return redirect(url_for('auth.team', id_=user.team_id))
-    return render_template('auth/user_create.html', errors=g.errors)
+            return redirect(url_for('events.events_list'))
+    return render_template('events/event_create.html', errors=g.errors)
 
 
 def do_create_event():
-    pass
+    try:
+        data = EVENT_CREATION_FORM.check(request.form.to_dict())
+    except t.DataError as e:
+        g.errors += ['{}: {}'.format(key, value)
+                     for key, value in e.error.items()]
+        return
+    print(data)
+    current_app.events_api.add_event(data)

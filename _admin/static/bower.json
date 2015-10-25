@@ -4,7 +4,8 @@
   "dependencies": {
     "flakes": "*",
     "jquery": "*",
-    "font-awesome": "*"
+    "font-awesome": "*",
+    "datetimepicker": "*"
   },
   "devDependencies": {}
 }

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block include_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='libs/datetimepicker/jquery.datetimepicker.css') }}">
+{% endblock %}
+
+{% block include_js %}
+    <script src="{{ url_for('static', filename='libs/datetimepicker/jquery.datetimepicker.js') }}"></script>
+{% endblock %}
+
+
+{% block content %}
+<h1>{{ _("Add Event") }}</h1>
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+<form class="grid-form" method="POST">
+    <div class="grid-10 gutter-20">
+        <div class="span-6">
+            <fieldset>
+                <legend>General</legend>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Title</label>
+                        <input type="text" name="title">
+                    </div>
+                </div>
+
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Agenda</label>
+                        <textarea rows="8" name="agenda"></textarea>
+                    </div>
+                </div>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Social</label>
+                        <textarea rows="3" name="social"></textarea>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="span-4">
+            <fieldset>
+                <legend>Details</legend>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Place</label>
+                        <input type="text" name="place">
+                    </div>
+                </div>
+
+                <div data-row-span="2">
+                    <div data-field-span="1">
+                        <label>Starts at</label>
+                        <input type="text" class="datepicker" name="when_start">
+                    </div>
+                    <div data-field-span="1">
+                        <label>Ends at</label>
+                        <input type="text" class="datepicker" name="when_end">
+                    </div>
+                </div>
+                <div data-row-span="2">
+                    <div data-field-span="1">
+                        <label>Include time</label>
+                        <input type="checkbox" name="include_time" value="true">
+                    </div>
+                    <div data-field-span="1">
+                        <label>Special</label>
+                        <input type="checkbox" name="special">
+                    </div>
+                </div>
+
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Level</label>
+                        <select name="level">
+                            <option value="NONE">- choose one -</option>
+                            <option value="TRAINEE">trainee</option>
+                            <option value="JUNIOR">junior</option>
+                            <option value="MIDDLE">middle</option>
+                            <option value="SENIOR">senior</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Registration link</label>
+                        <input type="text" name="registration_url">
+                    </div>
+                </div>
+
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Image URL</label>
+                        <input type="text" name="image_url">
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <br>
+    <input type="submit" class="button-green bigger" value="Add Event">
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+</form>
+
+<script>
+    jQuery('.datepicker').datetimepicker({
+        format:'Y-m-d H:i'
+    });
+</script>
+{% endblock %}
