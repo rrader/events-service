@@ -17,13 +17,13 @@
             <div class="grid-1">
                 <dl class="span-1">
                     <dt>Agenda</dt>
-                    <dd>{{event.agenda}}</dd>
+                    <dd>{{event.agenda|safe}}</dd>
                 </dl>
             </div>
             <div class="grid-1">
                 <dl class="span-1">
                     <dt>Social</dt>
-                    <dd>{{event.social}}</dd>
+                    <dd>{{event.social|safe}}</dd>
                 </dl>
             </div>
         </fieldset>
@@ -49,6 +49,7 @@
                       {% endif %}
                     </dd>
                 </dl>
+                {% if event.when_end %}
                 <dl class="span-1">
                     <dt>Ends at</dt>
                     <dd>
@@ -59,6 +60,7 @@
                       {% endif %}
                     </dd>
                 </dl>
+                {% endif %}
             </div>
             <div class="grid-1">
                 <dl class="span-1">

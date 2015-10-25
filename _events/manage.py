@@ -6,6 +6,7 @@ import uuid
 from events_service import settings
 from events_service.app import build_application
 from events_service.models import Base, EventsProvider
+from utils.itkpiloader import ImportEvents
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -44,6 +45,7 @@ app = build_application()
 manager = Manager(app)
 
 manager.add_command(AddProvider(app))
+manager.add_command(ImportEvents(app))
 
 sqlalchemy.configure_manager(manager, app, Base,  # TODO: use app['engine'] in manager
                              settings.DATABASE_USERNAME,

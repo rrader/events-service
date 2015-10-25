@@ -37,6 +37,7 @@ commands:
             alembic upgrade head
             python3 manage.py add_provider TEST1 --key 424242
             python3 manage.py add_provider TEST2 --key 434343
+            python3 manage.py import 424242
             python3 manage.py run_server
 
       db: !Command
