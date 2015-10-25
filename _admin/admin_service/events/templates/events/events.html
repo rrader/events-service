@@ -22,6 +22,7 @@
                 <td><input type="checkbox"></td>
                 <td class="name">Title</td>
                 <td>When</td>
+                <td>Last edited by</td>
             </tr>
         </thead>
         <tbody class="list">
@@ -36,6 +37,7 @@
                         {{ event.when_start|strfdate }}
                       {% endif %}
                     </td>
+                    <td>{{ event.metainfo.creator }}</td>
                 </tr>
             {% endfor %}
         </tbody>

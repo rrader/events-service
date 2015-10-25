@@ -30,7 +30,13 @@ class EventsServiceAPI:
                                     format(self.url, count, offset, sorting),
                                     headers={'Client-Key': api_key})
         self.process_errors(response)
-        return response.json()
+        data = response.json()
+        events = []
+        for event in data.pop('events'):
+            event['metainfo'] = json.loads(event.pop('metainfo'))
+            events.append(event)
+        data['events'] = events
+        return data
 
     def get_event(self, api_key, id_):
         response = self.session.get('{}/events/{}'.
