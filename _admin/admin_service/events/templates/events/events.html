@@ -5,33 +5,43 @@
 <h1>{{ _("Events") }}</h1>
 
 <div class="flakes-actions-bar">
+    <button type="submit" name="submit" form="events_list"
+            class="action button-red smaller" value="delete">Delete events</button>
     <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
 
     <!--<a class="action button-gray smaller" href="">Delete</a>-->
 </div>
 
-<table class="flakes-table">
-    <thead>
-        <tr>
-            <td class="name">Title</td>
-            <td>When</td>
-        </tr>
-    </thead>
-    <tbody class="list">
-        {% for event in events_data.events %}
+<form id="events_list" method="post">
+    <table class="flakes-table">
+        <colgroup>
+            <col span="1" style="width:20px" />
+        </colgroup>
+        <thead>
             <tr>
-              <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
-              <td>
-                  {% if event.include_time %}
-                    {{ event.when_start|strfdatetime }}
-                  {% else %}
-                    {{ event.when_start|strfdate }}
-                  {% endif %}
-              </td>
+                <td><input type="checkbox"></td>
+                <td class="name">Title</td>
+                <td>When</td>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody class="list">
+            {% for event in events_data.events %}
+                <tr>
+                    <td><input type="checkbox" name="{{ event.id }}"></td>
+                    <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
+                    <td>
+                      {% if event.include_time %}
+                        {{ event.when_start|strfdatetime }}
+                      {% else %}
+                        {{ event.when_start|strfdate }}
+                      {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+</form>
 <div class="flakes-actions-bar">
     pages
     {% if offset > 0 %}

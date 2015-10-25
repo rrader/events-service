@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block content %}
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+{% endblock %}

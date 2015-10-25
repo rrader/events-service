@@ -61,6 +61,21 @@ class RetrieveMixin(BaseResource, metaclass=ABCMeta):
         pass
 
 
+class DeleteMixin(BaseResource, metaclass=ABCMeta):
+    delete_routename = None
+
+    def register(self):
+        super().register()
+        path_ident = self.get_path() + r'/{ident}'
+        self.app.router.add_route('DELETE', path_ident,
+                                  self.delete, name=self.delete_routename)
+
+    @abstractmethod
+    @asyncio.coroutine
+    def delete(self, request):
+        pass
+
+
 class ListMixin(BaseResource, metaclass=ABCMeta):
     list_routename = None
 
@@ -244,6 +259,7 @@ class RetrieveModelMixin(RetrieveMixin):
 
         if not instance:
             raise HTTPNotFound(text=json.dumps({'id': ident}))
+
         instance = dict(instance)
         instance = self.serialize(dict(instance))
         data = json.dumps(instance).encode()
@@ -254,6 +270,31 @@ class RetrieveModelMixin(RetrieveMixin):
     @property
     def get_routename(self):
         return '{}-get'.format(self.singlename)
+
+
+class DeleteModelMixin(DeleteMixin):
+    @asyncio.coroutine
+    def delete(self, request):
+        yield from self.check_permissions(request)
+        ident = request.match_info['ident']
+        instance = yield from self.get_instance(request, ident)
+
+        if not instance:
+            raise HTTPNotFound(text=json.dumps({'id': ident}))
+
+        yield from self.perform_delete(request, ident)
+        return JSONResponse(status=http.client.OK)
+
+    @asyncio.coroutine
+    def perform_delete(self, request, id_):
+        with (yield from self.get_engine()) as conn:
+            yield from conn.execute(
+                self.model.__table__.delete().where(self.lookup_key == id_)
+            )
+
+    @property
+    def delete_routename(self):
+        return '{}-delete'.format(self.singlename)
 
 
 class ListModelMixin(ListMixin):
@@ -305,6 +346,7 @@ class ListModelMixin(ListMixin):
 class ModelResource(CreateModelMixin,
                     UpdateModelMixin,
                     RetrieveModelMixin,
+                    DeleteModelMixin,
                     ListModelMixin,
                     ModelBaseResource):
     pass

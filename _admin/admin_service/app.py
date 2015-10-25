@@ -9,7 +9,7 @@ from celery import Celery
 from admin_service.events.client import EventsServiceAPI
 
 from .extensions import (db, mail, pages, manager, login_manager, babel,
-    migrate, csrf, celery)
+    migrate, csrf, celery, cache)
 
 # blueprints
 from .frontend import frontend
@@ -82,6 +82,7 @@ def extensions_fabrics(app):
     migrate.init_app(app, db)
     csrf.init_app(app)
     celery.config_from_object(app.config)
+    cache.init_app(app)
 
 
 def api_fabrics():

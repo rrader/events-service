@@ -61,6 +61,12 @@ class EventsServiceAPI:
         self.process_errors(response)
         return response.headers['location']
 
+    def delete_event(self, api_key, id_):
+        response = self.session.delete('{}/events/{}'.
+                                       format(self.url, id_),
+                                       headers={'Client-Key': api_key})
+        self.process_errors(response)
+
     def process_errors(self, response):
         if response.status_code > 299:
             if response.status_code == 400:

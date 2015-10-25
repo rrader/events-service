@@ -27,3 +27,7 @@ csrf = CsrfProtect()
 
 from celery import Celery
 celery = Celery()
+
+from flask.ext.cache import Cache
+cache = Cache()
+

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block content %}
+Do you really want to {{ action }}?
+<form method="post">
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+    <input name=action_id type=hidden value="{{ action_id }}">
+    <button type="submit" name="submit"
+            class="action button-darkblue smaller" value="approve">YES</button>
+    <button type="submit" name="submit"
+            class="action button-darkblue smaller" value="cancel">NO</button>
+</form>
+{% endblock %}
