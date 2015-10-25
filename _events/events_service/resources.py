@@ -11,7 +11,7 @@ class EventValidator(ModelValidator):
     def __init__(self):
         super().__init__(Event)
 
-    def cut_provider(self, column):
+    def cut_provider(self, column, **kwargs):
         pass
 
 
@@ -38,7 +38,7 @@ class EventProviderValidator(ModelValidator):
     def __init__(self):
         super().__init__(EventsProvider)
 
-    def cut_key(self, column):
+    def cut_key(self, column, **kwargs):
         pass
 
 

@@ -21,27 +21,27 @@ class ColumnScissors:
         return DateTime(**kwargs)  # RFC3339
 
     def _bool_col(self, column, **kwargs):
-        return t.StrBool(**kwargs)
+        return t.StrBool()
 
-    def cut(self, column):
+    def cut(self, column, **kwargs):
         cut_method = 'cut_{}'.format(column.name)
         if hasattr(self, cut_method):
-            trafaret = getattr(self, cut_method)(column)
+            trafaret = getattr(self, cut_method)(column, **kwargs)
         else:
-            trafaret = self.default_cut(column)
+            trafaret = self.default_cut(column, **kwargs)
         return trafaret
 
-    def default_cut(self, column):
+    def default_cut(self, column, **kwargs):
         if isinstance(column.type, sqlalchemy.sql.sqltypes.Enum):
-            trafaret = self._enum_col(column)
+            trafaret = self._enum_col(column, **kwargs)
         elif isinstance(column.type, sqlalchemy.sql.sqltypes.String):
-            trafaret = self._str_col(column)
+            trafaret = self._str_col(column, **kwargs)
         elif isinstance(column.type, sqlalchemy.sql.sqltypes.Integer):
-            trafaret = self._int_col(column)
+            trafaret = self._int_col(column, **kwargs)
         elif isinstance(column.type, sqlalchemy.sql.sqltypes.DateTime):
-            trafaret = self._datetime_col(column)
+            trafaret = self._datetime_col(column, **kwargs)
         elif isinstance(column.type, sqlalchemy.sql.sqltypes.Boolean):
-            trafaret = self._bool_col(column)
+            trafaret = self._bool_col(column, **kwargs)
         else:
             raise NotImplementedError('{} has no implementation in validator'.format(str(column.type)))
         return trafaret
@@ -62,11 +62,15 @@ class ModelValidator(ColumnScissors):
             key_opts = {}
             key_opts['optional'] = column.nullable
             key = t.Key(column.name, **key_opts)
-            trafaret = self.cut(column)
+
+            val_opts = {}
+            val_opts['allow_blank'] = column.nullable
+            trafaret = self.cut(column, **val_opts)
             if not trafaret:
                 continue
             if column.nullable:
                 trafaret |= t.Null()
+                trafaret |= (t.String(max_length=0, allow_blank=True) >> (lambda x: None))
             fields[key] = trafaret
         return t.Dict(fields)
 
@@ -88,6 +92,7 @@ class ModelSerializer(ColumnScissors):
             trafaret = self.cut(column)
             if column.nullable:
                 trafaret |= t.Null()
+                trafaret |= (t.String(max_length=0, allow_blank=True) >> (lambda x: None))
             fields[key] = trafaret
         return t.Dict(fields)
 

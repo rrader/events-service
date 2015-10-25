@@ -47,6 +47,10 @@ commands:
             su postgres -c "echo 'host all all all trust' >> $PGDATA/pg_hba.conf"
             su postgres -c "$PG_BIN/postgres -F --port=$PG_PORT -h 127.0.0.1 -k /tmp" &
             sleep 1
+            su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"UPDATE pg_database SET datistemplate = FALSE WHERE datname = 'template1';\""
+            su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"DROP DATABASE template1;\""
+            su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"CREATE DATABASE template1 WITH TEMPLATE = template0 ENCODING = 'UNICODE';\""
+            su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template1';\""
             su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"CREATE USER $PG_USER WITH PASSWORD '$PG_PASSWORD';\""
             su postgres -c "$PG_BIN/createdb -h 127.0.0.1 -p $PG_PORT $PG_DB -O $PG_USER";
             rm -f /work/.tmp.dbcreation.lock
