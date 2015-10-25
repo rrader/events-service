@@ -20,8 +20,14 @@
     <tbody class="list">
         {% for event in events_data.events %}
             <tr>
-              <td><a href="#">{{ event.title }}</a></td>
-              <td>{{ event.when_start|strftime }}</td>
+              <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
+              <td>
+                  {% if event.include_time %}
+                    {{ event.when_start|strfdatetime }}
+                  {% else %}
+                    {{ event.when_start|strfdate }}
+                  {% endif %}
+              </td>
             </tr>
         {% endfor %}
     </tbody>

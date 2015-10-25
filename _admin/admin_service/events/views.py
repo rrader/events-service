@@ -5,6 +5,7 @@ from flask import (Blueprint, render_template, g, request, url_for,
     current_app, send_from_directory, json, redirect, make_response, abort)
 
 from flask.ext.login import login_required
+from admin_service.events.client import EventsServiceAPIError
 
 from ..extensions import pages, csrf
 import trafaret as t
@@ -34,12 +35,13 @@ EVENT_CREATION_FORM = t.Dict({
                              'social': t.String(allow_blank=True),
                              'place': t.String(allow_blank=True),
                              'registration_url': t.URL(allow_blank=True),
-                             'image_url': t.URL(allow_blank=True),
+                             'image_url': t.URL(allow_blank=True) | t.String(max_length=0, allow_blank=True),
                              'level': t.Enum('NONE', 'TRAINEE', 'JUNIOR', 'MIDDLE', 'SENIOR'),
                              t.Key('special', default=False): t.StrBool,
                              'when_start': t.String,
                              'when_end': t.String(allow_blank=True),
-                             t.Key('include_time', default=False): t.StrBool,
+                             t.Key('include_time', to_name='only_date', default=False):
+                                 t.StrBool >> (lambda x: not x),
                             }).ignore_extra('_csrf_token')
 
 
@@ -51,7 +53,8 @@ def create_event():
         do_create_event()
         if not g.errors:
             return redirect(url_for('events.events_list'))
-    return render_template('events/event_create.html', errors=g.errors)
+    return render_template('events/event_create.html', errors=g.errors,
+                           initial=request.form.to_dict())
 
 
 def do_create_event():
@@ -61,5 +64,17 @@ def do_create_event():
         g.errors += ['{}: {}'.format(key, value)
                      for key, value in e.error.items()]
         return
-    print(data)
-    current_app.events_api.add_event(data)
+    try:
+        current_app.events_api.add_event(g.user.team.events_token,
+                                         {'creator': g.user.username},
+                                         **data)
+    except EventsServiceAPIError as e:
+        g.errors += e.errors
+
+
+@events.route('details/<id_>')
+@login_required
+def events_details(id_):
+    r = current_app.events_api.get_event(g.user.team.events_token, id_)
+    return render_template('events/event_details.html',
+                           event=r)

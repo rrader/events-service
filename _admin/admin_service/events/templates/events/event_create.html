@@ -25,20 +25,20 @@
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Title</label>
-                        <input type="text" name="title">
+                        <input type="text" name="title" value="{{initial.title}}">
                     </div>
                 </div>
 
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Agenda</label>
-                        <textarea rows="8" name="agenda"></textarea>
+                        <textarea rows="8" name="agenda">{{initial.agenda}}</textarea>
                     </div>
                 </div>
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Social</label>
-                        <textarea rows="3" name="social"></textarea>
+                        <textarea rows="3" name="social">{{initial.social}}</textarea>
                     </div>
                 </div>
             </fieldset>
@@ -49,28 +49,28 @@
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Place</label>
-                        <input type="text" name="place">
+                        <input type="text" name="place" value="{{initial.place}}">
                     </div>
                 </div>
 
                 <div data-row-span="2">
                     <div data-field-span="1">
                         <label>Starts at</label>
-                        <input type="text" class="datepicker" name="when_start">
+                        <input type="text" class="datepicker" name="when_start" value="{{initial.when_start}}">
                     </div>
                     <div data-field-span="1">
                         <label>Ends at</label>
-                        <input type="text" class="datepicker" name="when_end">
+                        <input type="text" class="datepicker" name="when_end" value="{{initial.when_end}}">
                     </div>
                 </div>
                 <div data-row-span="2">
                     <div data-field-span="1">
                         <label>Include time</label>
-                        <input type="checkbox" name="include_time" value="true">
+                        <input type="checkbox" name="include_time" value="true" {% if initial.include_time %}checked{%endif%}>
                     </div>
                     <div data-field-span="1">
                         <label>Special</label>
-                        <input type="checkbox" name="special">
+                        <input type="checkbox" name="special" {% if initial.special %}checked{%endif%}>
                     </div>
                 </div>
 
@@ -78,7 +78,7 @@
                     <div data-field-span="1">
                         <label>Level</label>
                         <select name="level">
-                            <option value="NONE">- choose one -</option>
+                            <option value="NONE" disabled selected>- choose one -</option>
                             <option value="TRAINEE">trainee</option>
                             <option value="JUNIOR">junior</option>
                             <option value="MIDDLE">middle</option>
@@ -90,14 +90,14 @@
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Registration link</label>
-                        <input type="text" name="registration_url">
+                        <input type="text" name="registration_url" value="{{initial.registration_url}}">
                     </div>
                 </div>
 
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Image URL</label>
-                        <input type="text" name="image_url">
+                        <input type="text" name="image_url" value="{{initial.image_url}}">
                     </div>
                 </div>
             </fieldset>
