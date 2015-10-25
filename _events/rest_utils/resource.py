@@ -31,6 +31,21 @@ class CreateMixin(BaseResource, metaclass=ABCMeta):
         pass
 
 
+class UpdateMixin(BaseResource, metaclass=ABCMeta):
+    update_routename = None
+
+    def register(self):
+        super().register()
+        path_ident = self.get_path() + r'/{ident}'
+        self.app.router.add_route('PUT', path_ident,
+                                  self.update, name=self.update_routename)
+
+    @abstractmethod
+    @asyncio.coroutine
+    def update(self, request):
+        pass
+
+
 class RetrieveMixin(BaseResource, metaclass=ABCMeta):
     get_routename = None
 
@@ -61,6 +76,7 @@ class ListMixin(BaseResource, metaclass=ABCMeta):
 
 
 class Resource(CreateMixin,
+               UpdateMixin,
                RetrieveMixin,
                ListMixin,
                BaseResource):
@@ -182,6 +198,43 @@ class CreateModelMixin(CreateMixin):
         return '{}-create'.format(self.singlename)
 
 
+class UpdateModelMixin(UpdateMixin):
+    @asyncio.coroutine
+    def update(self, request):
+        yield from self.check_permissions(request)
+        id_ = request.match_info['ident']
+        data = yield from request.json()
+        data = self.validate(data)
+
+        yield from self.perform_update(request, id_, data)
+        if hasattr(self, 'get_routename'):
+            response = web.Response(
+               status=http.client.OK)
+            updated_path = self.app.router[self.get_routename].\
+                url(parts={'ident': id_})
+            location = "{}://{}{}".format(request.scheme, request.host, updated_path)
+            response.headers.extend({'Location': location})
+        else:
+            instance = yield from self.get_instance(request, id_)
+            data = self.serialize(dict(instance))
+            data.pop('id')  # anyway retrieve method is not allowed
+            response = JSONResponse(
+                data,
+                status=http.client.OK)
+        return response
+
+    @asyncio.coroutine
+    def perform_update(self, request, id_, data):
+        with (yield from self.get_engine()) as conn:
+            yield from conn.execute(
+                self.model.__table__.update().where(self.lookup_key == id_).values(**data)
+            )
+
+    @property
+    def update_routename(self):
+        return '{}-update'.format(self.singlename)
+
+
 class RetrieveModelMixin(RetrieveMixin):
     @asyncio.coroutine
     def get(self, request):
@@ -211,7 +264,16 @@ class ListModelMixin(ListMixin):
         yield from self.check_permissions(request)
         offset = int(request.GET.get('offset', 0))
         limit = int(request.GET.get('count', self.page_size))
+
+        order_by = request.GET.get('order_by', '')
+        if order_by:
+            order_column = self.model.__mapper__.columns[order_by.strip('-')]
+            if order_by.startswith('-'):
+                order_column = order_column.desc()
+
         query = self.base_query(request).offset(offset).limit(limit + 1)
+        if order_by:
+            query = query.order_by(order_column)
         with (yield from self.get_engine()) as conn:
             result = yield from conn.execute(query)
             instances = yield from result.fetchall()
@@ -241,6 +303,7 @@ class ListModelMixin(ListMixin):
 
 
 class ModelResource(CreateModelMixin,
+                    UpdateModelMixin,
                     RetrieveModelMixin,
                     ListModelMixin,
                     ModelBaseResource):

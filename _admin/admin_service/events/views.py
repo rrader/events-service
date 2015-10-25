@@ -21,7 +21,8 @@ def events_list():
     page = int(offset/count) + 1
     r = current_app.events_api.get_events(g.user.team.events_token,
                                           offset=offset,
-                                          count=count)
+                                          count=count,
+                                          sorting='-when_start')
     return render_template('events/events.html',
                            events_data=r,
                            offset=offset,
@@ -78,3 +79,33 @@ def events_details(id_):
     r = current_app.events_api.get_event(g.user.team.events_token, id_)
     return render_template('events/event_details.html',
                            event=r)
+
+
+@events.route('edit/<id_>', methods=['GET', 'POST'])
+@login_required
+def edit_event(id_):
+    r = current_app.events_api.get_event(g.user.team.events_token, id_)
+    g.errors = []
+    if request.method == 'POST':
+        do_edit_event(id_)
+        if not g.errors:
+            return redirect(url_for('events.events_list'))
+    return render_template('events/event_create.html', errors=g.errors,
+                           initial=r,
+                           edit=True)
+
+
+def do_edit_event(id_):
+    try:
+        data = EVENT_CREATION_FORM.check(request.form.to_dict())
+    except t.DataError as e:
+        g.errors += ['{}: {}'.format(key, value)
+                     for key, value in e.error.items()]
+        return
+    try:
+        current_app.events_api.edit_event(g.user.team.events_token,
+                                          id_,
+                                          {'creator': g.user.username},
+                                          **data)
+    except EventsServiceAPIError as e:
+        g.errors += e.errors

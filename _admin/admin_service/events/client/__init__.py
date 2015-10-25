@@ -23,9 +23,11 @@ class EventsServiceAPI:
                                      json={'name': name})
         return response.json()['key']
 
-    def get_events(self, api_key, offset=0, count=10):
-        response = self.session.get('{}/events?count={}&offset={}'.
-                                    format(self.url, count, offset),
+    def get_events(self, api_key, offset=0, count=10, sorting=None):
+        if not sorting:
+            sorting = ''
+        response = self.session.get('{}/events?count={}&offset={}&order_by={}'.
+                                    format(self.url, count, offset, sorting),
                                     headers={'Client-Key': api_key})
         self.process_errors(response)
         return response.json()
@@ -49,8 +51,18 @@ class EventsServiceAPI:
         self.process_errors(response)
         return response.headers['location']
 
+    def edit_event(self, api_key, id_, metainfo, **kwargs):
+        data = kwargs.copy()
+        data.update({'metainfo': json.dumps(metainfo)})
+        response = self.session.put('{}/events/{}'.
+                                    format(self.url, id_),
+                                    json=data,
+                                    headers={'Client-Key': api_key})
+        self.process_errors(response)
+        return response.headers['location']
+
     def process_errors(self, response):
         if response.status_code > 299:
             if response.status_code == 400:
                 raise EventsServiceAPIError(['{}: {} [api]'.format(k, v) for k, v in response.json().items()])
-            raise EventsServiceAPIError(['Events Service returned error'])
+            raise EventsServiceAPIError(['Events Service returned {} error'.format(response.status_code)])

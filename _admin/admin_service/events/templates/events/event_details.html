@@ -106,7 +106,7 @@
             </div>
             <div class="grid-1">
                 <dl class="span-1">
-                    <dt>Added by</dt>
+                    <dt>Last edited by</dt>
                     <dd>
                         {{ event.metainfo.creator }}
                     </dd>
@@ -116,5 +116,7 @@
     </div>
 
 </div>
+<br>
+<a class="action button-green bigger right" href="{{ url_for('events.edit_event', id_=event.id) }}">Edit</a>
 
 {% endblock %}

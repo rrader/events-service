@@ -11,7 +11,12 @@
 
 
 {% block content %}
+
+{% if edit %}
+<h1>{{ _("Edit Event") }}</h1>
+{% else %}
 <h1>{{ _("Add Event") }}</h1>
+{% endif %}
 
 {% for error in errors %}
     <p class="flakes-message error">{{ error }}</p>
@@ -78,11 +83,11 @@
                     <div data-field-span="1">
                         <label>Level</label>
                         <select name="level">
-                            <option value="NONE" disabled selected>- choose one -</option>
-                            <option value="TRAINEE">trainee</option>
-                            <option value="JUNIOR">junior</option>
-                            <option value="MIDDLE">middle</option>
-                            <option value="SENIOR">senior</option>
+                            <option value="NONE" disabled>- choose one -</option>
+                            <option value="TRAINEE" {% if initial.level == "TRAINEE" %}selected{% endif %}>trainee</option>
+                            <option value="JUNIOR" {% if initial.level == "JUNIOR" %}selected{% endif %}>junior</option>
+                            <option value="MIDDLE" {% if initial.level == "MIDDLE" %}selected{% endif %}>middle</option>
+                            <option value="SENIOR" {% if initial.level == "SENIOR" %}selected{% endif %}>senior</option>
                         </select>
                     </div>
                 </div>
@@ -104,7 +109,11 @@
         </div>
     </div>
     <br>
+    {% if edit %}
+    <input type="submit" class="button-green bigger" value="Edit Event">
+    {% else %}
     <input type="submit" class="button-green bigger" value="Add Event">
+    {% endif %}
     <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
 </form>
 
