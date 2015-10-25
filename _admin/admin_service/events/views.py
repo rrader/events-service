@@ -18,7 +18,7 @@ events = Blueprint('events', __name__, url_prefix='/events/', template_folder="t
 @login_required
 def events_list():
     offset = int(request.args.get('offset', 0))
-    count = int(request.args.get('count', 10))
+    count = int(request.args.get('count', 25))
     page = int(offset/count) + 1
     r = current_app.events_api.get_events(g.user.team.events_token,
                                           offset=offset,
@@ -130,12 +130,3 @@ def list_actions():
                     return render_template('events/error.html', errors=e)
 
     return redirect(request.url)
-    # r = current_app.events_api.get_event(g.user.team.events_token, id_)
-    # g.errors = []
-    # if request.method == 'POST':
-    #     do_edit_event(id_)
-    #     if not g.errors:
-    #         return redirect(url_for('events.events_list'))
-    # return render_template('events/event_create.html', errors=g.errors,
-    #                        initial=r,
-    #                        edit=True)
