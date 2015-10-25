@@ -16,6 +16,7 @@ from .frontend import frontend
 from .auth import auth
 from .api import api, initialize_api
 from .events import events
+from .digestmonkey import digestmonkey
 
 __all__ = ('create_app', 'create_celery', )
 
@@ -23,7 +24,8 @@ BLUEPRINTS = (
     frontend,
     auth,
     api,
-    events
+    events,
+    digestmonkey
 )
 
 
