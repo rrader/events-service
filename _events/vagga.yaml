@@ -5,7 +5,9 @@ containers:
     - !UbuntuUniverse
     - !Install [libpq-dev, ca-certificates, git, ssh]
     - !Py3Requirements requirements.txt
-    environ: {DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5434/vaggadb}
+    environ:
+      DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5434/vaggadb
+      PG_PORT: 5434
 
   postgres:
     setup:
@@ -56,3 +58,15 @@ commands:
             su postgres -c "$PG_BIN/createdb -h 127.0.0.1 -p $PG_PORT $PG_DB -O $PG_USER";
             rm -f /work/.tmp.dbcreation.lock
             wait
+
+  data: !Command
+    container: events_service
+    run: |
+        alembic upgrade head
+        python3 manage.py add_provider TEST1 --key 424242
+        python3 manage.py add_provider TEST2 --key 434343
+        python3 manage.py import 424242
+
+  onlyservice: !Command
+    container: events_service
+    run: python3 manage.py run_server

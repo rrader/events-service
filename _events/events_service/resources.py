@@ -1,7 +1,8 @@
 import ast
 import asyncio
-import json
 import operator
+import sqlalchemy.sql.sqltypes
+from sqlalchemy import Column
 import uuid
 from aiohttp.web_exceptions import HTTPBadRequest
 from events_service.permissions import KeyProvided
@@ -29,6 +30,9 @@ def parse_query(model, query):
         ast.LtE: operator.le,
     }
 
+    def get_operator(op, left, right):
+        return operators[op](left, right)
+
     def _eval(node):
         if isinstance(node, ast.Num):
             return node.n
@@ -39,12 +43,13 @@ def parse_query(model, query):
         elif isinstance(node, ast.Compare):
             if len(node.comparators) != 1 and len(node.ops) != 1:
                 raise TypeError(node)
-            return operators[type(node.ops[0])](_eval(node.left),
-                                                _eval(node.comparators[0]))
+            return get_operator(type(node.ops[0]),
+                                _eval(node.left), _eval(node.comparators[0]))
         elif isinstance(node, ast.BoolOp):
-            return operators[type(node.op)](_eval(node.values[0]),
-                                            _eval(node.values[1]))
+            return get_operator(type(node.op),
+                                _eval(node.values[0]), _eval(node.values[1]))
         raise TypeError(node)
+
     return _eval(ast.parse(query, mode='eval').body)
 
 
