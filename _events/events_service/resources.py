@@ -38,6 +38,8 @@ def parse_query(model, query):
             return node.n
         elif isinstance(node, ast.Str):
             return node.s
+        elif isinstance(node, ast.NameConstant):
+            return node.value
         elif isinstance(node, ast.Name):
             return model.__mapper__.columns[node.id]
         elif isinstance(node, ast.Compare):
