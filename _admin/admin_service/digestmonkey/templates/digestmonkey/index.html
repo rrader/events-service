@@ -4,4 +4,7 @@
 {% block content %}
 <h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
 
+<div class="flakes-actions-bar">
+    <a href="{{ url_for('digestmonkey.setup') }}" class="button-gray smaller">Setup</a>
+</div>
 {% endblock %}

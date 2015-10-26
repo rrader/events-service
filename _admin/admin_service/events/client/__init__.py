@@ -23,11 +23,11 @@ class EventsServiceAPI:
                                      json={'name': name})
         return response.json()['key']
 
-    def get_events(self, api_key, offset=0, count=10, sorting=None):
+    def get_events(self, api_key, offset=0, count=10, sorting=None, query=None):
         if not sorting:
             sorting = ''
-        response = self.session.get('{}/events?count={}&offset={}&order_by={}'.
-                                    format(self.url, count, offset, sorting),
+        response = self.session.get('{}/events?count={}&offset={}&order_by={}&query={}'.
+                                    format(self.url, count, offset, sorting, query),
                                     headers={'Client-Key': api_key})
         self.process_errors(response)
         data = response.json()

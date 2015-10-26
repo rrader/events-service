@@ -4,9 +4,24 @@
 {% block content %}
 <h1>{{ _("Events") }}</h1>
 
+<div class="flakes-message">
+    <b>Search Query Examples</b><br>
+    <ol>
+        <li>(when_start>="2015-10-31") and (when_start<="2015-11-01")</li>
+        <li>special==True</li>
+    </ol>
+    Fields available: <i>title, agenda, social, image_url, level, place, when_start, when_end, only_date, registration_url, special</i>
+</div>
+<div class="flakes-search">
+    <form method="get" id="search">
+        <input class="search-box search" placeholder="Search Events" autofocus name="query">
+    </form>
+</div>
 <div class="flakes-actions-bar">
+    <button type="submit" form="search"
+            class="action button-gray smaller">Search</button>
     <button type="submit" name="submit" form="events_list"
-            class="action button-red smaller" value="delete">Delete events</button>
+            class="action button-red smaller right" value="delete">Delete events</button>
     <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
 
     <!--<a class="action button-gray smaller" href="">Delete</a>-->

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block content %}
+<h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+<form class="grid-form" method="POST">
+    <fieldset>
+        <legend>Setup DigestMonkey</legend>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>MailChimp API Key</label>
+                <input type="text" name="mailchimp_key" value="{% if initial.mailchimp_key %}{{ initial.mailchimp_key }}{% endif %}">
+            </div>
+        </div>
+    </fieldset>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+    <br>
+    <input type="submit" class="button-green bigger" value="Save">
+</form>
+{% endblock %}

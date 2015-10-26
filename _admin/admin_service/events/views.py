@@ -19,11 +19,13 @@ events = Blueprint('events', __name__, url_prefix='/events/', template_folder="t
 def events_list():
     offset = int(request.args.get('offset', 0))
     count = int(request.args.get('count', 25))
+    query = request.args.get('query', '')
     page = int(offset/count) + 1
     r = current_app.events_api.get_events(g.user.team.events_token,
                                           offset=offset,
                                           count=count,
-                                          sorting='-when_start')
+                                          sorting='-when_start',
+                                          query=query)
     return render_template('events/events.html',
                            events_data=r,
                            offset=offset,

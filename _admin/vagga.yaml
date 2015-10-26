@@ -5,7 +5,9 @@ containers:
     - !UbuntuUniverse
     - !Install [libpq-dev, ca-certificates, git, ssh]
     - !Py3Requirements requirements.txt
-    environ: {DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5433/vaggadb}
+    environ:
+      PG_PORT: 5433
+      DATABASE_URL: postgres://vaggauser:password@127.0.0.1:5433/vaggadb
 
   postgres:
     setup:
@@ -46,10 +48,13 @@ commands:
       service: !Command
         container: admin_service
         run: |
-            touch /work/.tmp.dbcreation.lock
-            while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
-            python3 manage.py db upgrade
-            python3 manage.py auth create_admin --password 1111
+            if ! netstat -npl | grep $PG_PORT
+            then
+              touch /work/.tmp.dbcreation.lock
+              while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
+              python3 manage.py db upgrade
+              python3 manage.py auth create_admin --password 1111
+            fi
             python3 manage.py runserver -h 0.0.0.0 -p 5001 -d -r
 
       celery: !Command
