@@ -11,7 +11,7 @@
 {% block include_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='libs/datetimepicker/jquery.datetimepicker.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='libs/redactor/redactor/redactor.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='libs/jquery-ui/themes/smoothness/jquery-ui.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='libs/jquery-ui/themes/ui-lightness/jquery-ui.min.css') }}" />
 {% endblock %}
 
 {% block include_js %}
@@ -53,13 +53,13 @@
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Agenda</label>
-                        <textarea rows="15" name="agenda" id="agendaEditor">{{initial.agenda}}</textarea>
+                        <textarea rows="15" name="agenda" id="agendaEditor">{%if initial.agenda %}{{initial.agenda|safe}}{%endif%}</textarea>
                     </div>
                 </div>
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Social</label>
-                        <textarea rows="5" name="social" id="socialEditor">{{initial.social}}</textarea>
+                        <textarea rows="5" name="social" id="socialEditor">{%if initial.social %}{{initial.social|safe}}{%endif%}</textarea>
                     </div>
                 </div>
             </fieldset>
@@ -141,12 +141,10 @@ jQuery_1( document ).ready(function() {
     jQuery_1(function()
     {
         jQuery_1('#agendaEditor').redactor({
-            autoresize: false, air: true,
-            buttons: ['format', 'bold', 'italic']
+            autoresize: false, air: false
         });
         jQuery_1('#socialEditor').redactor({
-            autoresize: false, air: true,
-            buttons: ['format', 'bold', 'italic']
+            autoresize: false, air: false
         });
     });
 });

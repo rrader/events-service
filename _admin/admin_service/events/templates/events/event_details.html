@@ -17,13 +17,13 @@
             <div class="grid-1">
                 <dl class="span-1">
                     <dt>Agenda</dt>
-                    <dd>{{event.agenda|safe}}</dd>
+                    <dd>{%if event.agenda %}{{event.agenda|safe}}{%endif%}</dd>
                 </dl>
             </div>
             <div class="grid-1">
                 <dl class="span-1">
                     <dt>Social</dt>
-                    <dd>{{event.social|safe}}</dd>
+                    <dd>{%if event.social %}{{event.social|safe}}{%endif%}</dd>
                 </dl>
             </div>
         </fieldset>
