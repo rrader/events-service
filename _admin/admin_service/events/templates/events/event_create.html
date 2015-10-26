@@ -77,7 +77,7 @@
                 <div data-row-span="2">
                     <div data-field-span="1">
                         <label>Starts at</label>
-                        <input type="text" class="datepicker" name="when_start" value="{% if initial.include_time %}{{ initial.when_start|strfdatetime }}{% else %}{{ initial.when_start|strfdate }}{% endif %}"">
+                        <input type="text" class="datepicker" name="when_start" value="{% if initial.when_start %}{% if initial.include_time %}{{ initial.when_start|strfdatetime }}{% else %}{{ initial.when_start|strfdate }}{% endif %}{% endif %}">
                     </div>
                     <div data-field-span="1">
                         <label>Ends at</label>

@@ -54,9 +54,9 @@ EVENT_CREATION_FORM = t.Dict({
 def create_event():
     g.errors = []
     if request.method == 'POST':
-        do_create_event()
+        id_ = do_create_event()
         if not g.errors:
-            return redirect(url_for('events.events_list'))
+            return redirect(url_for('events.events_details', id_=id_))
     return render_template('events/event_create.html', errors=g.errors,
                            initial=request.form.to_dict())
 
@@ -68,12 +68,15 @@ def do_create_event():
         g.errors += ['{}: {}'.format(key, value)
                      for key, value in e.error.items()]
         return
+    id_ = None
     try:
-        current_app.events_api.add_event(g.user.team.events_token,
-                                         {'creator': g.user.username},
-                                         **data)
+        created = current_app.events_api.add_event(g.user.team.events_token,
+                                                   {'creator': g.user.username},
+                                                   **data)
+        id_ = created.split('/')[-1]
     except EventsServiceAPIError as e:
         g.errors += e.errors
+    return id_
 
 
 @events.route('details/<id_>')
