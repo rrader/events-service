@@ -92,7 +92,7 @@ def edit_event(id_):
     if request.method == 'POST':
         do_edit_event(id_)
         if not g.errors:
-            return redirect(url_for('events.events_list'))
+            return redirect(url_for('events.events_details', id_=id_))
     return render_template('events/event_create.html', errors=g.errors,
                            initial=r,
                            edit=True)

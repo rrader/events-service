@@ -9,6 +9,9 @@
   <meta name="apple-touch-fullscreen" content="yes">
 
   <title>{% block title %}{{ page_title|default(_('evnt')) }}{% endblock %}</title>
+  {% block before_includes %}
+  {% endblock %}
+
   <link rel="stylesheet" href="{{ url_for('static', filename='libs/flakes/css/all.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='libs/font-awesome/css/font-awesome.min.css') }}">
   {% block include_css %}

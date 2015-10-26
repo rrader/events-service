@@ -1,12 +1,28 @@
 {% extends "base.html" %}
 {% set page_title = _('Events DB') %}
 
+{% block before_includes %}
+    <script src="{{ url_for('static', filename='libs/jquery-1/jquery.min.js') }}"></script>
+    <script type="text/javascript">
+        jQuery_1 = $.noConflict(true);
+    </script>
+{% endblock %}
+
 {% block include_css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='libs/datetimepicker/jquery.datetimepicker.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='libs/redactor/redactor/redactor.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='libs/jquery-ui/themes/smoothness/jquery-ui.min.css') }}" />
 {% endblock %}
 
 {% block include_js %}
     <script src="{{ url_for('static', filename='libs/datetimepicker/jquery.datetimepicker.js') }}"></script>
+
+
+    <script>jQuery_2 = jQuery; jQuery = jQuery_1;</script>
+    <script src="{{ url_for('static', filename='libs/redactor/redactor/redactor.min.js') }}"></script>
+    <script>jQuery = jQuery_2;</script>
+
+    <script src="{{ url_for('static', filename='libs/jquery-ui/jquery-ui.min.js') }}"></script>
 {% endblock %}
 
 
@@ -37,13 +53,13 @@
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Agenda</label>
-                        <textarea rows="8" name="agenda">{{initial.agenda}}</textarea>
+                        <textarea rows="15" name="agenda" id="agendaEditor">{{initial.agenda}}</textarea>
                     </div>
                 </div>
                 <div data-row-span="1">
                     <div data-field-span="1">
                         <label>Social</label>
-                        <textarea rows="3" name="social">{{initial.social}}</textarea>
+                        <textarea rows="5" name="social" id="socialEditor">{{initial.social}}</textarea>
                     </div>
                 </div>
             </fieldset>
@@ -61,11 +77,11 @@
                 <div data-row-span="2">
                     <div data-field-span="1">
                         <label>Starts at</label>
-                        <input type="text" class="datepicker" name="when_start" value="{{initial.when_start}}">
+                        <input type="text" class="datepicker" name="when_start" value="{% if initial.include_time %}{{ initial.when_start|strfdatetime }}{% else %}{{ initial.when_start|strfdate }}{% endif %}"">
                     </div>
                     <div data-field-span="1">
                         <label>Ends at</label>
-                        <input type="text" class="datepicker" name="when_end" value="{{initial.when_end}}">
+                        <input type="text" class="datepicker" name="when_end" value="{% if initial.when_end %}{% if initial.include_time %}{{ initial.when_end|strfdatetime }}{% else %}{{ initial.when_end|strfdate }}{% endif %}{% endif %}">
                     </div>
                 </div>
                 <div data-row-span="2">
@@ -118,8 +134,21 @@
 </form>
 
 <script>
+jQuery_1( document ).ready(function() {
     jQuery('.datepicker').datetimepicker({
         format:'Y-m-d H:i'
     });
+    jQuery_1(function()
+    {
+        jQuery_1('#agendaEditor').redactor({
+            autoresize: false, air: true,
+            buttons: ['format', 'bold', 'italic']
+        });
+        jQuery_1('#socialEditor').redactor({
+            autoresize: false, air: true,
+            buttons: ['format', 'bold', 'italic']
+        });
+    });
+});
 </script>
 {% endblock %}
