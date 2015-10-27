@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set page_title = _('Export to ICalendar') %}
+
+{% block content %}
+<h1>{{ _("Export to ICalendar") }}</h1>
+
+<h2>ICS Calendar</h2>
+<p>Your ICS Feed (right click on the button and copy link):</p>
+<a class="button-green bigger" href="{{ url_for('export.ics_feed', slug=config.config_slug) }}">Get ICS Link</a>
+<a class="button-gray bigger" href="{{ url_for('export.setup_ics') }}">Reconfigure</a>
+{% endblock %}

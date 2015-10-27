@@ -8,7 +8,7 @@
         {% if user.is_authenticated %}
             <li><a href="{{ url_for('events.events_list') }}">Events Database</a></li>
             <li><a href="{{ url_for('digestmonkey.index') }}">Digest Monkey</a></li>
-            <li><a href="#">Calendar</a></li>
+            <li><a href="{{ url_for('export.index') }}">Export Events</a></li>
         {% endif %}
         <li><a href="{{ url_for('frontend.page') }}">{{ _("About Site ") }}</a></li>
     </ul>

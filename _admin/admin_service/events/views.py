@@ -33,7 +33,7 @@ class EventsList(MethodView):
             sess = db.session()
             q = sess.query(PublishedDigest).\
                 filter(PublishedDigest.events_ids.contains([int(event['id'])]))
-            event['published'] = q.first()
+            event['published'] = q.all()
             events.append(event)
         r['events'] = events
         return render_template(self.template,

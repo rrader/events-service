@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set page_title = _('Export') %}
+
+{% block content %}
+<h1>{{ _("Export Events") }}</h1>
+
+<h3>ICS Calendar</h3>
+<p>You can produce events feed in ICalendar(ICS) format to add it to
+    Google Calendars or any other calendar application supporting ICS</p>
+<a class="button-green" href="{{ url_for('export.export_ics') }}">Get ICS Link</a>
+{% endblock %}

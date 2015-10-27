@@ -83,7 +83,9 @@
                     <td>{{ event.metainfo.creator }}</td>
                     <td>
                         {% if event.published %}
-                            <a href="{{ event.published.id }}"><i class="fa fa-check-circle-o"></i></a>
+                            {% for digest in event.published %}
+                            <a href="{{ url_for('digestmonkey.digest_details', id_=digest.id) }}"><i class="fa fa-check-circle-o"></i></a>
+                            {% endfor %}
                         {% else %}
                             <i class="fa fa-ban"></i>
                         {% endif %}

@@ -18,6 +18,7 @@ from .auth import auth
 from .api import api, initialize_api
 from .events import events
 from .digestmonkey import digestmonkey
+from .export import export
 
 __all__ = ('create_app', 'create_celery', )
 
@@ -26,7 +27,8 @@ BLUEPRINTS = (
     auth,
     api,
     events,
-    digestmonkey
+    digestmonkey,
+    export
 )
 
 
@@ -67,6 +69,7 @@ def create_celery(app):
                 return TaskBase.__call__(self, *args, **kwargs)
     celery.Task = ContextTask
     return celery
+
 
 def blueprints_fabrics(app, blueprints):
     """Configure blueprints in views."""

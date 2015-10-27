@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set page_title = _('Export to ICalendar') %}
+
+{% block content %}
+<h1>{{ _("Export to ICalendar") }} <i class="fa fa-hand-peace-o"></i></h1>
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+<form class="grid-form" method="POST">
+    <fieldset>
+        <legend>Setup Export</legend>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Calendar "PRODID" Field (in format -//Calendar Name//domain.com//)</label>
+                <input type="text" name="calendar_prodid" value="{% if initial.calendar_prodid %}{{ initial.calendar_prodid }}{% endif %}" placeholder="-//A Calendar//somewhere.com//">
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>Query from Events DB (optional)</label>
+                <input type="text" name="query" value="{% if initial.query %}{{ initial.query }}{% endif %}" placeholder="special==True">
+            </div>
+        </div>
+    </fieldset>
+    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+    <br>
+    <input type="submit" class="button-green bigger" value="Save">
+</form>
+{% endblock %}
