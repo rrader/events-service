@@ -13,7 +13,7 @@ def prepare_packages():
 
 
 @task
-def build_container(name, microservice):
+def build_container(name, microservice, additional=None):
     require_vagga()
     require_packages('git')
 
@@ -25,6 +25,8 @@ def build_container(name, microservice):
         run('git clone {} .'.format(REPO))
         with cd(microservice):
             run('vagga _build {}'.format(name))
+            if additional:
+                run(additional)
             rootfs = run('readlink -f .vagga/{}'.format(name))
             run('cp -R * .vagga/{}/work/'.format(name))
             run('tar zcf {}.tar.gz -C {} ./'.format(name, rootfs))
@@ -49,8 +51,8 @@ def deploy_last_container(name, microservice):
 
 
 @task
-def deploy_container(name, microservice):
-    build_container(name, microservice)
+def deploy_container(name, microservice, additional=None):
+    build_container(name, microservice, additional)
     deploy_last_container(name, microservice)
 
 
@@ -64,6 +66,13 @@ def deploy_postgres():
 def deploy_events():
     deploy_container('events_service', '_events')
     run('systemctl restart systemd-nspawn@events_service.service')
+
+
+@task
+def deploy_nginx():
+    build_static = 'vagga _run nginx bash -c "cd static; bower install --allow-root --config.interactive=false"'
+    deploy_container('nginx', '_admin', additional=build_static)
+    run('systemctl restart systemd-nspawn@nginx.service')
 
 
 def get_build_path(name):
