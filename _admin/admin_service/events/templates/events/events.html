@@ -34,88 +34,95 @@
         </fieldset>
     </div>
 </div>
-<div class="flakes-search">
-    <form method="get" id="search">
-        <input class="search-box search" placeholder="Search Events" autofocus name="query" value="{{ query }}">
-    </form>
+<div class="grid-1">
+    <div class="span-1">
+        <div class="flakes-search">
+            <form method="get" id="search">
+                <input class="search-box search" placeholder="Search Events" autofocus name="query" value="{{ query }}">
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
-<div class="flakes-actions-bar">
-    <button type="submit" form="search"
-            class="action button-gray smaller">Search</button>
-    <a href="?query=" class="action button-gray smaller">Clear search</a>
+<div class="grid-1">
+    <div class="span-1">
+        <div class="flakes-actions-bar">
+            <button type="submit" form="search"
+                    class="action button-gray smaller">Search</button>
+            <a href="?query=" class="action button-gray smaller">Clear search</a>
 
-    {% block action_buttons %}
-    <button type="submit" name="submit" form="events_list"
-            class="action button-red smaller right" value="delete">Delete events</button>
-    <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
-    {% endblock %}
+            {% block action_buttons %}
+            <button type="submit" name="submit" form="events_list"
+                    class="action button-red smaller right" value="delete">Delete events</button>
+            <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
+            {% endblock %}
+        </div>
+
+        {% block events_list %}
+        <form id="events_list" method="post">
+            <table class="flakes-table">
+                <colgroup>
+                    <col span="1" style="width:20px" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <td><input type="checkbox" id="selectAllEvents"></td>
+                        <td class="name">Title</td>
+                        <td>When</td>
+                        <td>Last edited by</td>
+                        <td>Published</td>
+                    </tr>
+                </thead>
+                <tbody class="list">
+                    {% for event in events_data.events %}
+                        <tr>
+                            <td><input type="checkbox" class="eventSelect" name="{{ event.id }}"></td>
+                            <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
+                            <td>
+                              {% if event.include_time %}
+                                {{ event.when_start|strfdatetime }}
+                              {% else %}
+                                {{ event.when_start|strfdate }}
+                              {% endif %}
+                            </td>
+                            <td>{{ event.metainfo.creator }}</td>
+                            <td>
+                                {% if event.published %}
+                                    {% for digest in event.published %}
+                                    <a href="{{ url_for('digestmonkey.digest_details', id_=digest.id) }}"><i class="fa fa-check-circle-o"></i></a>
+                                    {% endfor %}
+                                {% else %}
+                                    <i class="fa fa-ban"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+        </form>
+        <div class="flakes-actions-bar">
+            pages
+            {% if offset > 0 %}
+                <a href="{{ url_for('events.events_list') }}?offset=0&count={{ count }}">&Lt;</a>
+                <a href="{{ url_for('events.events_list') }}?offset={{ offset - count }}&count={{ count }}">&lt; {{ page-1 }}</a>
+            {% endif %}
+            <a href="{{ url_for('events.events_list') }}?offset={{ offset }}&count={{ count }}">{{page}}</a>
+            {% if events_data.has_next %}
+                <a href="{{ url_for('events.events_list') }}?offset={{ offset + count }}&count={{ count }}">{{ page + 1 }} &gt;</a>
+            {% endif %}
+        </div>
+
+        <script>
+            $(document).ready(function() {
+                $('#selectAllEvents').change(function() {
+                    $('.eventSelect').prop("checked", $(this).is(':checked'));
+                });
+                $('#selectAllEvents').prop("checked", false);
+            });
+        </script>
+        {% endblock %}
+    </div>
 </div>
-
-{% block events_list %}
-<form id="events_list" method="post">
-    <table class="flakes-table">
-        <colgroup>
-            <col span="1" style="width:20px" />
-        </colgroup>
-        <thead>
-            <tr>
-                <td><input type="checkbox" id="selectAllEvents"></td>
-                <td class="name">Title</td>
-                <td>When</td>
-                <td>Last edited by</td>
-                <td>Published</td>
-            </tr>
-        </thead>
-        <tbody class="list">
-            {% for event in events_data.events %}
-                <tr>
-                    <td><input type="checkbox" class="eventSelect" name="{{ event.id }}"></td>
-                    <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
-                    <td>
-                      {% if event.include_time %}
-                        {{ event.when_start|strfdatetime }}
-                      {% else %}
-                        {{ event.when_start|strfdate }}
-                      {% endif %}
-                    </td>
-                    <td>{{ event.metainfo.creator }}</td>
-                    <td>
-                        {% if event.published %}
-                            {% for digest in event.published %}
-                            <a href="{{ url_for('digestmonkey.digest_details', id_=digest.id) }}"><i class="fa fa-check-circle-o"></i></a>
-                            {% endfor %}
-                        {% else %}
-                            <i class="fa fa-ban"></i>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
-</form>
-<div class="flakes-actions-bar">
-    pages
-    {% if offset > 0 %}
-        <a href="{{ url_for('events.events_list') }}?offset=0&count={{ count }}">&Lt;</a>
-        <a href="{{ url_for('events.events_list') }}?offset={{ offset - count }}&count={{ count }}">&lt; {{ page-1 }}</a>
-    {% endif %}
-    <a href="{{ url_for('events.events_list') }}?offset={{ offset }}&count={{ count }}">{{page}}</a>
-    {% if events_data.has_next %}
-        <a href="{{ url_for('events.events_list') }}?offset={{ offset + count }}&count={{ count }}">{{ page + 1 }} &gt;</a>
-    {% endif %}
-</div>
-
-<script>
-    $(document).ready(function() {
-        $('#selectAllEvents').change(function() {
-            $('.eventSelect').prop("checked", $(this).is(':checked'));
-        });
-        $('#selectAllEvents').prop("checked", false);
-    });
-</script>
-{% endblock %}
-
 {% endblock %}

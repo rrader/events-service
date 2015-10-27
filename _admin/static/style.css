@@ -1,2 +1,9 @@
 /* Custom project CSS styles */
 /* Pro tip: CSS can be compiled by LESS/SASS */
+.flakes-table {
+    table-layout: fixed;
+}
+
+.flakes-table td {
+    white-space: normal !important;
+}
