@@ -4,6 +4,65 @@
 {% block content %}
 
 <h1>Welcome back!</h1>
-You're logged in as <i>{{ user.username }}</i>.
+
+
+{% for error in errors %}
+    <p class="flakes-message error">{{ error }}</p>
+{% endfor %}
+
+{% if message %}
+    <p class="flakes-message info">{{ message }}</p>
+{% endif %}
+
+
+<div class="grid-2 gutter-20">
+    <div class="span-1">
+        <fieldset class="flakes-information-box">
+            <legend>General</legend>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Username</dt>
+                    <dd>
+                        {{ user.username }}
+                    </dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Team</dt>
+                    <dd>
+                        {{user.team.name}}
+                    </dd>
+                </dl>
+            </div>
+        </fieldset>
+    </div>
+    <div class="span-1">
+        <form class="grid-form" method="POST">
+            <fieldset>
+                <legend>Change password</legend>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Old Password</label>
+                        <input type="text" name="oldpassword">
+                    </div>
+                </div>
+                <div data-row-span="2">
+                    <div data-field-span="1">
+                        <label>New Password</label>
+                        <input type="text" name="password1">
+                    </div>
+                    <div data-field-span="1">
+                        <label>Confirm New Password</label>
+                        <input type="text" name="password2">
+                    </div>
+                </div>
+            </fieldset>
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+            <br>
+            <button type="submit" class="button-green" name="submit" value="change_password">Change password</button>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

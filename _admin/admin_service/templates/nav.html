@@ -24,6 +24,7 @@
     <ul>
       <li class="title">Accounts</li>
       {% if user.is_authenticated %}
+      <li><a href="{{ url_for('auth.profile') }}"><i class="fa fa-user"></i> {{ _("Profile") }}</a></li>
       <li><a href="{{ url_for('auth.logout') }}" data-confirm="{{ _('Do you want to logout?')}}" data-title="{{ _('Logout?') }}"><i class="fa fa-sign-out"></i> {{ _("Logout") }}</a></li>
       {% else %}
       <li><a href="{{ url_for('auth.login') }}"> {{ _("Login") }} </a></li>

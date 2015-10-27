@@ -36,10 +36,41 @@ def do_login():
     return []
 
 
-@auth.route('profile')
+CHANGE_PASSWORD_FORM = t.Dict({'oldpassword': t.String(allow_blank=True) >> (lambda x: x if hash_password(x) == g.user.password
+                                                                     else t.DataError('Wrong old password')),
+                                KeysSubset('password1', 'password2'):
+                                 (lambda x:
+                                  {'password': hash_password(x['password1'])
+                                   if x['password1'] == x['password2']
+                                   else t.DataError('Passwords does not match')
+                                   })
+                                }).ignore_extra('_csrf_token', 'submit')
+
+@auth.route('profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('auth/profile.html')
+    g.errors = []
+    message = None
+    if request.method == 'POST':
+        if request.form['submit'] == 'change_password':
+            do_change_password()
+            if not g.errors:
+                message = 'Password changed'
+    return render_template('auth/profile.html', errors=g.errors,
+                           message=message)
+
+
+def do_change_password():
+    try:
+        data = CHANGE_PASSWORD_FORM.check(request.form.to_dict())
+    except t.DataError as e:
+        g.errors += ['{}: {}'.format(key, value)
+                     for key, value in e.error.items()]
+        return
+    sess = db.session()
+    g.user.password = data['password']
+    sess.add(g.user)
+    sess.commit()
 
 
 @auth.route('logout')
