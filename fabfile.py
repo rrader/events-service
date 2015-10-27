@@ -75,6 +75,12 @@ def deploy_nginx():
     run('systemctl restart systemd-nspawn@nginx.service')
 
 
+@task
+def deploy_admin():
+    deploy_container('admin_service', '_admin')
+    run('systemctl restart systemd-nspawn@admin_service.service')
+
+
 def get_build_path(name):
     build_path = '/tmp/build/{}'.format(name)
     return build_path
