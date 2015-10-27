@@ -32,14 +32,26 @@ containers:
     - !Alpine v3.2
     - !Install [redis]
 
-  nodejs:
+  nginx:
     setup:
-    - !Alpine v3.2
-    - !Install [git]
-    - !NpmInstall [bower]
+      - !Ubuntu trusty
+      - !UbuntuUniverse
+      - !Install [nginx, git]
+      - !NpmInstall [bower]
+      - !Depends runtime/nginx.conf
+      - !Sh |
+          rm /etc/nginx/sites-enabled/default
+          cp runtime/nginx.local.conf /etc/nginx/conf.d/site.conf
     environ:
       HOME: /tmp
-
+    volumes:
+      /var: !Tmpfs
+       mode: 0o766
+       subdirs:
+        lib:
+        lib/nginx:
+        log: # default mode is 0o766
+        log/nginx: { mode: 0o1777 }
 
 commands:
   run: !Supervise
@@ -83,7 +95,8 @@ commands:
         container: redis
         run: "redis-server --daemonize no --bind 127.0.0.1"
 
-  setup: !Command
-    container: nodejs
+  nginx: !Command
+    container: nginx
     run: |
-        cd static && bower install --allow-root --config.interactive=false
+        (cd static && bower install --allow-root --config.interactive=false)
+        nginx -g "daemon off;" -c /work/runtime/nginx.local.conf
