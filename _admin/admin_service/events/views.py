@@ -6,31 +6,44 @@ from flask import (Blueprint, render_template, g, request, url_for,
     current_app, send_from_directory, json, redirect, make_response, abort)
 
 from flask.ext.login import login_required
+from flask.views import MethodView
 from admin_service.events.client import EventsServiceAPIError
 
-from ..extensions import pages, csrf, cache
+from ..extensions import pages, csrf, cache, db
 import trafaret as t
 
 events = Blueprint('events', __name__, url_prefix='/events/', template_folder="templates")
 
 
-@events.route('list')
-@login_required
-def events_list():
-    offset = int(request.args.get('offset', 0))
-    count = int(request.args.get('count', 25))
-    query = request.args.get('query', '')
-    page = int(offset/count) + 1
-    r = current_app.events_api.get_events(g.user.team.events_token,
-                                          offset=offset,
-                                          count=count,
-                                          sorting='-when_start',
-                                          query=query)
-    return render_template('events/events.html',
-                           events_data=r,
-                           offset=offset,
-                           count=count,
-                           page=page)
+class EventsList(MethodView):
+    template = 'events/events.html'
+
+    def get(self):
+        offset = int(request.args.get('offset', 0))
+        count = int(request.args.get('count', 25))
+        query = request.args.get('query', '')
+        page = int(offset/count) + 1
+        r = current_app.events_api.get_events(g.user.team.events_token,
+                                              offset=offset,
+                                              count=count,
+                                              sorting='-when_start',
+                                              query=query)
+        events = []
+        for event in r.pop('events'):
+            sess = db.session()
+            q = sess.query(PublishedDigest).\
+                filter(PublishedDigest.events_ids.contains([int(event['id'])]))
+            event['published'] = q.first()
+            events.append(event)
+        r['events'] = events
+        return render_template(self.template,
+                               events_data=r,
+                               offset=offset,
+                               count=count,
+                               page=page,
+                               query=query)
+
+events.add_url_rule('list', view_func=login_required(EventsList.as_view('events_list')))
 
 
 EVENT_CREATION_FORM = t.Dict({
@@ -127,6 +140,8 @@ def list_actions():
         return render_template('events/approve.html', action='delete events', action_id=action_id)
     elif request.form['submit'] == 'approve':
         data = cache.get(request.form['action_id'])
+        if not data:
+            return render_template('events/error.html', errors=['Expired'])
         if data['action'] == 'delete':
             for item in data['items']:
                 try:
@@ -135,3 +150,6 @@ def list_actions():
                     return render_template('events/error.html', errors=e)
 
     return redirect(request.url)
+
+
+from admin_service.digestmonkey.models import PublishedDigest

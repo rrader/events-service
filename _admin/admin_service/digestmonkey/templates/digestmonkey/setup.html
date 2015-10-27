@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set page_title = _('Events DB') %}
+{% set page_title = _('Digest Monkey') %}
 
 {% block content %}
 <h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
@@ -15,6 +15,18 @@
             <div data-field-span="1">
                 <label>MailChimp API Key</label>
                 <input type="text" name="mailchimp_key" value="{% if initial.mailchimp_key %}{{ initial.mailchimp_key }}{% endif %}">
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>GitHub API Key</label>
+                <input type="text" name="github_key" value="{% if initial.github_key %}{{ initial.github_key }}{% endif %}">
+            </div>
+        </div>
+        <div data-row-span="1">
+            <div data-field-span="1">
+                <label>GitHub Digest Templates repository (in format "username/reponame")</label>
+                <input type="text" name="templates_uri" value="{% if initial.templates_uri %}{{ initial.templates_uri }}{% endif %}" placeholder="username/reponame">
             </div>
         </div>
     </fieldset>

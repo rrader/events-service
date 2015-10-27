@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set page_title = _('Digest Monkey') %}
+
+{% block content %}
+<h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
+
+<p>Step 1: you selected {{ subset.list|length }} events</p>
+<p><a href="{{ url_for('digestmonkey.choose_template', subset_id=subset_id) }}">Step 2</a>: you selected template "{{ subset.template}}"</p>
+<h2>Step 3</h2>
+
+<fieldset>
+    <legend>Configure Template</legend>
+    <form method="post">
+        <ul>
+            {% for variable,initial in variables.items() %}
+            <li>
+                <label>{{variable|replace('_',' ')|capitalize}}</label>
+                <input type="text" placeholder="{{variable|replace('_',' ')|capitalize}}"
+                       value="{{initial}}" name="{{ variable }}">
+            </li>
+            {% endfor %}
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+            <li>
+                <button type="submit"
+                    class="action button-magenta">Submit</button>
+            </li>
+        </ul>
+    </form>
+</fieldset>
+
+{% endblock %}

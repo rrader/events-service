@@ -1,8 +1,46 @@
 {% extends "base.html" %}
-{% set page_title = _('Events DB') %}
+{% set page_title = _('Digest Monkey') %}
 
 {% block content %}
 <h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
+
+<fieldset>
+    <legend>Make the mailing company</legend>
+    <p>To create the digest you need to</p>
+    <ul>
+        <li>Make events subset</li>
+        <li>Choose and configure email template</li>
+        <li>Send it to your subscribers using MailChimp</li>
+    </ul>
+    <a href="{{ url_for('digestmonkey.make_subset') }}" class="button-magenta bigger">Make events subset</a>
+</fieldset>
+
+
+<table class="flakes-table">
+    <colgroup>
+        <!--<col span="1" style="width:20px" />-->
+        <col span="1" style="width:40%" />
+    </colgroup>
+    <thead>
+        <tr>
+            <!--<td><input type="checkbox"></td>-->
+            <td>Subject</td>
+            <td>Subscribers List</td>
+            <td>MailChimp</td>
+        </tr>
+    </thead>
+    <tbody class="list">
+        {% for campaign in last_campaigns %}
+        <tr>
+          <!--<td><input type="checkbox"></td>-->
+          <td><a href="{{ url_for('digestmonkey.digest_details', id_=campaign.id) }}">{{ campaign.subject }}</a></td>
+          <td>{{ campaign.s_list_name }}</td>
+          <td><a href="https://admin.mailchimp.com/campaigns/show?id={{ campaign.web_id }}">Open on MailChimp</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br>
 
 <div class="flakes-actions-bar">
     <a href="{{ url_for('digestmonkey.setup') }}" class="button-gray smaller">Setup</a>

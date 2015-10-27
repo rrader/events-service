@@ -45,3 +45,6 @@ WTForms==2.0.2
 setuptools==18.4
 psycopg2
 trafaret
+PyGithub==1.25.2
+simplejson
+mailchimp==2.0.9

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% set page_title = _('Digest Monkey') %}
+
+{% block content %}
+<h1>{{ _("Digest Monkey") }}</h1>
+
+<div class="grid-10 gutter-20">
+    <div class="span-6">
+        <fieldset class="flakes-information-box">
+            <legend>General</legend>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Events list</dt>
+                    <dd>
+                        <ol>
+                            {% for event in digest.events_data %}
+                            <li><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></li>
+                            {% endfor %}
+                        </ol>
+                    </dd>
+                </dl>
+            </div>
+        </fieldset>
+    </div>
+    <div class="span-4">
+        <fieldset class="flakes-information-box">
+            <legend>Email Properties</legend>
+
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Subject</dt>
+                    <dd>{{digest.subject}}</dd>
+                </dl>
+            </div>
+            <div class="grid-2">
+                <dl class="span-1">
+                    <dt>From: name</dt>
+                    <dd>{{ digest.from_name }}</dd>
+                </dl>
+                <dl class="span-1">
+                    <dt>From: Email</dt>
+                    <dd>{{ digest.from_email }}</dd>
+                </dl>
+            </div>
+        </fieldset>
+
+        <fieldset class="flakes-information-box">
+            <legend>MailChimp</legend>
+
+            <div class="grid-2">
+                <dl class="span-1">
+                    <dt>Subscribers List</dt>
+                    <dd>{{ digest.s_list_name }}</dd>
+                </dl>
+                <dl class="span-1">
+                    <dt>Campaign</dt>
+                    <dd><a href="https://admin.mailchimp.com/campaigns/show?id={{ digest.web_id }}">Campaign on MailChimp</a></dd>
+                </dl>
+            </div>
+        </fieldset>
+
+        <fieldset class="flakes-information-box">
+            <legend>Other</legend>
+
+            <div class="grid-2">
+                <dl class="span-1">
+                    <dt>Template used</dt>
+                    <dd>{{ digest.template }}</dd>
+                </dl>
+            </div>
+        </fieldset>
+    </div>
+
+</div>
+<br>
+<fieldset class="flakes-information-box">
+    <legend>Preview</legend>
+
+    <iframe src="{{ url_for('digestmonkey.digest_details_preview', id_=digest.id ) }}" width="100%"
+        height="600px" frameborder="0"></iframe>
+</fieldset>
+
+{% endblock %}

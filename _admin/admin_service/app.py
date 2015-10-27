@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #pylint:disable-msg=W0612
+import datetime
 
 import os
 import dateutil
@@ -143,6 +144,18 @@ def gvars(app):
         except AttributeError:
             return {'user': None}
 
+    @app.context_processor
+    def dateutils():
+        today = datetime.date.today()
+        cw_monday = today + datetime.timedelta(days=-today.weekday())
+        cw_sunday = today + datetime.timedelta(days=7 - today.weekday())
+        nw_monday = today + datetime.timedelta(days=-today.weekday() + 7)
+        nw_sunday = today + datetime.timedelta(days=7 - today.weekday() + 7)
+        return dict(cw_monday=cw_monday,
+                    cw_sunday=cw_sunday,
+                    nw_monday=nw_monday,
+                    nw_sunday=nw_sunday)
+
     @babel.localeselector
     def get_locale():
         if g.user:
@@ -207,3 +220,7 @@ def template_filters(app):
         date = dateutil.parser.parse(date)
         native = date.replace(tzinfo=None)
         return native.strftime('%Y-%m-%d')
+
+    @app.template_filter('strftime')
+    def _jinja2_filter_date(date, fmt):
+        return date.strftime(fmt)

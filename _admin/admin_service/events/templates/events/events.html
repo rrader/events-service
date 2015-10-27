@@ -2,31 +2,58 @@
 {% set page_title = _('Events DB') %}
 
 {% block content %}
-<h1>{{ _("Events") }}</h1>
 
-<div class="flakes-message">
-    <b>Search Query Examples</b><br>
-    <ol>
-        <li>(when_start>="2015-10-31") and (when_start<="2015-11-01")</li>
-        <li>special==True</li>
-    </ol>
-    Fields available: <i>title, agenda, social, image_url, level, place, when_start, when_end, only_date, registration_url, special</i>
+{% block header %}
+<h1>{{ _("Events") }}</h1>
+{% endblock %}
+
+{% block search %}
+
+<div class="grid-3 gutter-20">
+    <div class="span-2">
+        <div class="flakes-message">
+            <b>Search Query Examples</b><br>
+            <ol>
+                <li>(when_start>="2015-10-31") and (when_start<="2015-11-01")</li>
+                <li>special==True</li>
+            </ol>
+            Fields available: <i>title, agenda, social, image_url, level, place, when_start, when_end, only_date, registration_url, special</i>
+        </div>
+    </div>
+    <div class="span-1">
+        <fieldset class="flakes-information-box">
+            <legend>Predefined Filters</legend>
+            <dl>
+                <dt>Current week</dt>
+                <dd><a href="?query=(when_start >= '{{ cw_monday|strftime('%Y-%m-%d') }}') and (when_start < '{{ cw_sunday|strftime('%Y-%m-%d') }}')">{{ cw_monday|strftime('%Y-%m-%d') }} .. {{ cw_sunday|strftime('%Y-%m-%d') }}</a></dd>
+            </dl>
+            <dl>
+                <dt>Next week</dt>
+                <dd><a href="?query=(when_start >= '{{ nw_monday|strftime('%Y-%m-%d') }}') and (when_start < '{{ nw_sunday|strftime('%Y-%m-%d') }}')">{{ nw_monday|strftime('%Y-%m-%d') }} .. {{ nw_sunday|strftime('%Y-%m-%d') }}</a></dd>
+            </dl>
+        </fieldset>
+    </div>
 </div>
 <div class="flakes-search">
     <form method="get" id="search">
-        <input class="search-box search" placeholder="Search Events" autofocus name="query">
+        <input class="search-box search" placeholder="Search Events" autofocus name="query" value="{{ query }}">
     </form>
 </div>
+{% endblock %}
+
 <div class="flakes-actions-bar">
     <button type="submit" form="search"
             class="action button-gray smaller">Search</button>
+    <a href="?query=" class="action button-gray smaller">Clear search</a>
+
+    {% block action_buttons %}
     <button type="submit" name="submit" form="events_list"
             class="action button-red smaller right" value="delete">Delete events</button>
     <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
-
-    <!--<a class="action button-gray smaller" href="">Delete</a>-->
+    {% endblock %}
 </div>
 
+{% block events_list %}
 <form id="events_list" method="post">
     <table class="flakes-table">
         <colgroup>
@@ -34,16 +61,17 @@
         </colgroup>
         <thead>
             <tr>
-                <td><input type="checkbox"></td>
+                <td><input type="checkbox" id="selectAllEvents"></td>
                 <td class="name">Title</td>
                 <td>When</td>
                 <td>Last edited by</td>
+                <td>Published</td>
             </tr>
         </thead>
         <tbody class="list">
             {% for event in events_data.events %}
                 <tr>
-                    <td><input type="checkbox" name="{{ event.id }}"></td>
+                    <td><input type="checkbox" class="eventSelect" name="{{ event.id }}"></td>
                     <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
                     <td>
                       {% if event.include_time %}
@@ -53,6 +81,13 @@
                       {% endif %}
                     </td>
                     <td>{{ event.metainfo.creator }}</td>
+                    <td>
+                        {% if event.published %}
+                            <a href="{{ event.published.id }}"><i class="fa fa-check-circle-o"></i></a>
+                        {% else %}
+                            <i class="fa fa-ban"></i>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -70,4 +105,15 @@
         <a href="{{ url_for('events.events_list') }}?offset={{ offset + count }}&count={{ count }}">{{ page + 1 }} &gt;</a>
     {% endif %}
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('#selectAllEvents').change(function() {
+            $('.eventSelect').prop("checked", $(this).is(':checked'));
+        });
+        $('#selectAllEvents').prop("checked", false);
+    });
+</script>
+{% endblock %}
+
 {% endblock %}

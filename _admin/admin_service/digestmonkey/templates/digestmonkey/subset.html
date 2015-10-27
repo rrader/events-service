@@ -1,0 +1,16 @@
+{% extends "events/events.html" %}
+{% set page_title = _('Digest Monkey') %}
+
+{% block header %}
+<h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
+{% endblock %}
+<h2>Step 1</h2>
+
+{% block action_buttons %}
+{% endblock %}
+
+{% block events_list %}
+{{ super() }}
+<button type="submit" name="submit" form="events_list"
+            class="action button-magenta bigger right" value="subset">Select</button>
+{% endblock %}

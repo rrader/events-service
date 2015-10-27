@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set page_title = _('Digest Monkey') %}
+
+{% block content %}
+<h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
+
+<p>Step 1: you selected {{ subset.list|length }} events</p>
+<h2>Step 2</h2>
+
+<ul>
+{% for template in templates %}
+    <li><a href="{{ url_for('digestmonkey.template_chosen', subset_id=subset_id, filename=template.name) }}">{{ template.name }}</a>: [<a href="{{ template.html_url }}">on github</a>]</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

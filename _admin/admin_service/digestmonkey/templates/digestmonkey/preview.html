@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% set page_title = _('Digest Monkey') %}
+
+{% block content %}
+<h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
+
+<p>Step 1: you selected {{ subset.list|length }} events</p>
+<p><a href="{{ url_for('digestmonkey.choose_template', subset_id=subset_id) }}">Step 2</a>: you selected template "{{ subset.template}}"</p>
+<p><a href="{{ url_for('digestmonkey.configure_template', subset_id=subset_id) }}">Step 3</a>: variables set for template</p>
+<h2>Step 4</h2>
+
+<fieldset class="flakes-information-box">
+    <legend>Preview</legend>
+    <iframe src="{{ url_for('digestmonkey.preview_content', subset_id=subset_id) }}" width="100%"
+        height="600px" frameborder="0"></iframe>
+</fieldset>
+
+<a href="{{ url_for('digestmonkey.choose_maillist', subset_id=subset_id) }}"
+        class="action button-magenta">Approve</a>
+
+{% endblock %}
