@@ -85,7 +85,7 @@ class ModelSerializer(ColumnScissors):
     @property
     def _validator(self):
         if self._model is None:
-            raise ValidationError('ModelValidator is not associated with model')
+            raise ValidationError('ModelSerializer is not associated with model')
         fields = {}
         for column in self._model.__table__.columns.values():
             key = t.Key(column.name)
