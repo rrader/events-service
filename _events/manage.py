@@ -1,8 +1,8 @@
 import logging
 import asyncio
+import uuid
 from aio_manager import Manager, Command
 from aio_manager.commands.ext import sqlalchemy
-import uuid
 from events_service import settings
 from events_service.app import build_application
 from events_service.models import Base, EventsProvider
