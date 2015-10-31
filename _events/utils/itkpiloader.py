@@ -1,7 +1,7 @@
-from aio_manager import Manager, Command
 import asyncio
 import aiohttp
 import json
+from aio_manager import Manager, Command
 from events_service.models import Event, EventsProvider
 from dateutil.parser import parse
 
