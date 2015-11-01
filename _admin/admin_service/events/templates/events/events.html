@@ -80,7 +80,7 @@
                             <td><input type="checkbox" class="eventSelect" name="{{ event.id }}"></td>
                             <td><a href="{{ url_for('events.events_details', id_=event.id) }}">{{ event.title }}</a></td>
                             <td>
-                              {% if event.include_time %}
+                              {% if not event.only_date %}
                                 {{ event.when_start|strfdatetime }}
                               {% else %}
                                 {{ event.when_start|strfdate }}

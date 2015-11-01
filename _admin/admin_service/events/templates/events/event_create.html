@@ -77,17 +77,17 @@
                 <div data-row-span="2">
                     <div data-field-span="1">
                         <label>Starts at</label>
-                        <input type="text" class="datepicker" name="when_start" value="{% if initial.when_start %}{% if initial.include_time %}{{ initial.when_start|strfdatetime }}{% else %}{{ initial.when_start|strfdate }}{% endif %}{% endif %}">
+                        <input type="text" class="datepicker" name="when_start" value="{% if initial.when_start %}{% if not initial.only_date %}{{ initial.when_start|strfdatetime }}{% else %}{{ initial.when_start|strfdate }}{% endif %}{% endif %}">
                     </div>
                     <div data-field-span="1">
                         <label>Ends at</label>
-                        <input type="text" class="datepicker" name="when_end" value="{% if initial.when_end %}{% if initial.include_time %}{{ initial.when_end|strfdatetime }}{% else %}{{ initial.when_end|strfdate }}{% endif %}{% endif %}">
+                        <input type="text" class="datepicker" name="when_end" value="{% if initial.when_end %}{% if not initial.only_date %}{{ initial.when_end|strfdatetime }}{% else %}{{ initial.when_end|strfdate }}{% endif %}{% endif %}">
                     </div>
                 </div>
                 <div data-row-span="2">
                     <div data-field-span="1">
                         <label>Include time</label>
-                        <input type="checkbox" name="include_time" value="true" {% if initial.include_time %}checked{%endif%}>
+                        <input type="checkbox" name="include_time" value="true" {% if not initial.only_date %}checked{%endif%}>
                     </div>
                     <div data-field-span="1">
                         <label>Special</label>

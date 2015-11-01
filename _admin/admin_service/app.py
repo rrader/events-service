@@ -216,7 +216,7 @@ def template_filters(app):
     def _jinja2_filter_datetime(date, fmt=None):
         date = dateutil.parser.parse(date)
         native = date.replace(tzinfo=None)
-        return native.strftime('%Y-%m-%d %H:%i')
+        return native.strftime('%Y-%m-%d %H:%M')
 
     @app.template_filter('strfdate')
     def _jinja2_filter_date(date, fmt=None):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import uuid
-import dateutil
+import logging
 
 from flask import (Blueprint, render_template, g, request, url_for,
     current_app, send_from_directory, json, redirect, make_response, abort)
@@ -13,6 +13,8 @@ from ..extensions import pages, csrf, cache, db
 import trafaret as t
 
 events = Blueprint('events', __name__, url_prefix='/events/', template_folder="templates")
+
+logger = logging.getLogger(__name__)
 
 
 class EventsList(MethodView):
@@ -70,13 +72,17 @@ def create_event():
         id_ = do_create_event()
         if not g.errors:
             return redirect(url_for('events.events_details', id_=id_))
+    initial = request.form.to_dict()
+    if not initial:
+        initial['only_date'] = True
     return render_template('events/event_create.html', errors=g.errors,
-                           initial=request.form.to_dict())
+                           initial=initial)
 
 
 def do_create_event():
     try:
         data = EVENT_CREATION_FORM.check(request.form.to_dict())
+        logger.info('' + data)
     except t.DataError as e:
         g.errors += ['{}: {}'.format(key, value)
                      for key, value in e.error.items()]
