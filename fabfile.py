@@ -74,6 +74,11 @@ def deploy_nginx():
     deploy_container('nginx', '_admin', additional=build_static)
     run('systemctl restart systemd-nspawn@nginx.service')
 
+@task
+def deploy_redis():
+    deploy_container('redis', '_admin')
+    run('systemctl restart systemd-nspawn@redis.service')
+
 
 @task
 def deploy_admin():

@@ -1,0 +1,16 @@
+[Unit]
+Description=Container %I
+Documentation=man:systemd-nspawn(1)
+PartOf=machines.target
+Before=machines.target
+
+[Service]
+ExecStart=/usr/bin/systemd-nspawn --register=no --machine=%I --bind=/opt/redis/data:/var/lib/redis/ redis-server --daemonize no --bind 127.0.0.1
+KillMode=mixed
+Type=notify
+RestartForceExitStatus=133
+SuccessExitStatus=133
+Delegate=yes
+
+[Install]
+WantedBy=machines.target

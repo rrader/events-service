@@ -1,0 +1,16 @@
+[Unit]
+Description=Container %I
+Documentation=man:systemd-nspawn(1)
+PartOf=machines.target
+Before=machines.target
+
+[Service]
+ExecStart=/usr/bin/systemd-nspawn --register=no --machine=%I --register=no --setenv=DATABASE_URL=<URL> bash -c 'cd /work; python3 manage.py run_server --hostname 0.0.0.0 --port 5000'
+KillMode=mixed
+Type=notify
+RestartForceExitStatus=133
+SuccessExitStatus=133
+Delegate=yes
+
+[Install]
+WantedBy=machines.target

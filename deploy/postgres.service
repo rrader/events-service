@@ -1,0 +1,16 @@
+[Unit]
+Description=Container %I
+Documentation=man:systemd-nspawn(1)
+PartOf=machines.target
+Before=machines.target
+
+[Service]
+ExecStart=/usr/bin/systemd-nspawn --register=no --machine=%I --setenv=PGDATA=/data --bind=/opt/postgres/data:/data su postgres -c '/usr/lib/postgresql/9.3/bin/postgres -h 127.0.0.1 -p 5433 -k /tmp -F'
+KillMode=mixed
+Type=notify
+RestartForceExitStatus=133
+SuccessExitStatus=133
+Delegate=yes
+
+[Install]
+WantedBy=machines.target
