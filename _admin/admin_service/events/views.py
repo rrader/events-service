@@ -74,7 +74,7 @@ def create_event():
             return redirect(url_for('events.events_details', id_=id_))
     initial = request.form.to_dict()
     if not initial:
-        initial['only_date'] = True
+        initial['only_date'] = False
     return render_template('events/event_create.html', errors=g.errors,
                            initial=initial)
 

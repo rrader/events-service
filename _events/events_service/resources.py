@@ -2,8 +2,6 @@ import ast
 import asyncio
 import operator
 import uuid
-import sqlalchemy.sql.sqltypes
-from sqlalchemy import Column
 from aiohttp.web_exceptions import HTTPBadRequest
 from events_service.permissions import KeyProvided
 from rest_utils.resource import ModelResource, ModelBaseResource, CreateModelMixin

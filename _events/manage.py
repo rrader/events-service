@@ -1,4 +1,3 @@
-import logging
 import asyncio
 import uuid
 from aio_manager import Manager, Command
@@ -7,8 +6,6 @@ from events_service import settings
 from events_service.app import build_application
 from events_service.models import Base, EventsProvider
 from utils.itkpiloader import ImportEvents
-
-logging.basicConfig(level=logging.WARNING)
 
 
 class AddProvider(Command):

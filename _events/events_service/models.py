@@ -48,7 +48,7 @@ class EventsProvider(Base):
 
 @asyncio.coroutine
 def setup(app):
-    engine = yield from create_engine(DATABASE_URL)
+    engine = yield from create_engine(DATABASE_URL, echo=True, timeout=5)
     app['db_engine'] = engine
     app['db_declarative_base'] = Base
     metadata.bind = engine
