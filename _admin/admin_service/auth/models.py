@@ -15,15 +15,19 @@ class User(db.Model):
     admin = db.Column(db.Boolean, default=False)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
 
+    @property
     def is_authenticated(self):
         return True
 
+    @property
     def is_active(self):
         return self.active
 
+    @property
     def is_admin(self):
         return self.admin
 
+    @property
     def is_anonymous(self):
         return False
 

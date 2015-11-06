@@ -1,7 +1,10 @@
 from fabric.api import run, settings, task, cd
 from fabric.decorators import runs_once
 from fabric.contrib.files import exists
+from fabric.api import env
 
+env.hosts = ['eventsmonkey.itkpi.pp.ua']
+env.user = 'root'
 
 REPO = 'https://github.com/rrader/events-service.git'
 BASE_TARGET_PATH = '/opt'
