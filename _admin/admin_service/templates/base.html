@@ -44,6 +44,9 @@
             </div>
 
             <div class="view-wrap">
+                {% if suggested_events_count > 0 %}
+                    <p class="flakes-message information">You've got <a href="{{ url_for('events.suggested_events_list') }}">{{ suggested_events_count }} suggested events</a></p>
+                {% endif %}
                 {% block content %}
                 <h1>Evnt</h1>
                 {% endblock %}
