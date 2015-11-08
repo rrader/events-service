@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #pylint:disable-msg=W0612
 import datetime
 

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
 from flask import Blueprint, render_template, redirect, request, current_app, g, flash, url_for
 from flask.ext.login import login_required, logout_user, login_user
-from flask.ext.babel import gettext as _
 from sqlalchemy.orm.exc import NoResultFound
 from admin_service.auth.utils import hash_password, admin_required
 from .models import User, Team
 from ..extensions import db
-from .forms import SettingsForm
 import trafaret as t
 from trafaret.extras import KeysSubset
 

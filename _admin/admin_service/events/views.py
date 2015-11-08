@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import uuid
 import logging
 
@@ -82,7 +81,7 @@ def create_event():
 def do_create_event():
     try:
         data = EVENT_CREATION_FORM.check(request.form.to_dict())
-        logger.info('' + data)
+        logger.info(json.dumps(data))
     except t.DataError as e:
         g.errors += ['{}: {}'.format(key, value)
                      for key, value in e.error.items()]
