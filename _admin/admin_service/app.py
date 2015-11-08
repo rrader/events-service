@@ -161,8 +161,10 @@ def gvars(app):
 
     @app.context_processor
     def suggested_events():
-        count = SuggestedEvent.query.filter(SuggestedEvent.team == g.user.team.id).count()
-        return dict(suggested_events_count=count)
+        if g.user.is_authenticated:
+            count = SuggestedEvent.query.filter(SuggestedEvent.team == g.user.team.id).count()
+            return dict(suggested_events_count=count)
+        return dict()
 
     @babel.localeselector
     def get_locale():
