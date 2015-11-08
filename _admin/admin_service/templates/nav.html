@@ -7,6 +7,7 @@
         <li class="title">Applications</li>
         {% if user.is_authenticated %}
             <li><a href="{{ url_for('events.events_list') }}">Events Database</a></li>
+            <li><a href="{{ url_for('events.suggested_events_list') }}">Suggested Events ({{ suggested_events_count }})</a></li>
             <li><a href="{{ url_for('digestmonkey.index') }}">Digest Monkey</a></li>
             <li><a href="{{ url_for('export.index') }}">Export Events</a></li>
         {% endif %}

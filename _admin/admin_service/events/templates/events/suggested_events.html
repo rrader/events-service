@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block content %}
+
+{% block header %}
+<h1>{{ _("Suggested Events") }}</h1>
+{% endblock %}
+
+<div class="grid-1">
+    <div class="span-1">
+        {% block events_list %}
+        <form id="events_list" method="post">
+            <table class="flakes-table">
+                <colgroup>
+                    <col span="1" style="width:20px" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td class="name">Title</td>
+                        <td>When</td>
+                        <td>Submitter</td>
+                        <td>Actions</td>
+                    </tr>
+                </thead>
+                <tbody class="list">
+                    {% for event in events %}
+                        <tr>
+                            <td><input type="checkbox" class="eventSelect" name="{{ event.secret }}"></td>
+                            <td><a href="{{ url_for('events.suggested_events_details', secret=event.secret) }}">
+                                {{ event.title }}</a>
+                            </td>
+                            <td>
+                              {% if not event.only_date %}
+                                {{ event.when_start|strftime('%Y-%m-%d %H:%M') }}
+                              {% else %}
+                                {{ event.when_start|strftime('%Y-%m-%d') }}
+                              {% endif %}
+                            </td>
+                            <td>
+                                {{ event.submitter_email }}
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+        </form>
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

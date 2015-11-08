@@ -19,3 +19,9 @@ class SuggestedEvent(db.Model):
     secret = db.Column(db.String(256), nullable=False,
                        doc='secret key to edit the suggested event',
                        primary_key=True)
+
+    def to_dict(self):
+        dict_ = {}
+        for key in self.__mapper__.c.keys():
+            dict_[key] = getattr(self, key)
+        return dict_

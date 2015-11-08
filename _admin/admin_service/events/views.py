@@ -7,9 +7,12 @@ from flask import (Blueprint, render_template, g, request, url_for,
 from flask.ext.login import login_required
 from flask.views import MethodView
 from admin_service.events.client import EventsServiceAPIError
+from admin_service.events.models import SuggestedEvent
 
 from ..extensions import pages, csrf, cache, db
 import trafaret as t
+import dateutil.parser
+
 
 events = Blueprint('events', __name__, url_prefix='/events/', template_folder="templates")
 
@@ -158,3 +161,52 @@ def list_actions():
 
 
 from admin_service.digestmonkey.models import PublishedDigest
+
+
+class SuggestedEventsList(MethodView):
+    template = 'events/suggested_events.html'
+
+    def get(self):
+        events = SuggestedEvent.query.filter(SuggestedEvent.team == g.user.team.id).all()
+        return render_template(self.template,
+                               events=events)
+
+events.add_url_rule('suggested/list',
+                    view_func=login_required(SuggestedEventsList.as_view('suggested_events_list')))
+
+
+@events.route('suggested/details/<secret>')
+@login_required
+def suggested_events_details(secret):
+    event = SuggestedEvent.query.get(secret)
+    return render_template('events/suggested_event_details.html',
+                           event=event)
+
+
+@events.route('suggested/accept/<secret>', methods=['GET', 'POST'])
+@login_required
+def accept_suggested_event(secret):
+    g.errors = []
+    if request.method == 'POST':
+        id_ = do_create_event()
+        if not g.errors:
+            return redirect(url_for('events.events_details', id_=id_))
+
+    initial = request.form.to_dict()
+    event = SuggestedEvent.query.get(secret)
+    initial.update(event.to_dict())
+    initial['when_start'] = initial['when_start'].isoformat()
+    if initial['when_end']:
+        initial['when_end'] = initial['when_end'].isoformat()
+    if not initial['registration_url']:
+        initial['registration_url'] = ''
+    return render_template('events/event_create.html', errors=g.errors,
+                           initial=initial)
+
+
+@events.route('suggested/decline/<secret>')
+@login_required
+def decline_suggested_event(secret):
+    SuggestedEvent.query.filter(SuggestedEvent.secret == secret).delete()
+    db.session.commit()
+    return redirect(url_for('events.suggested_events_list'))

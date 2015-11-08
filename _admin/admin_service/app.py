@@ -7,6 +7,7 @@ from flask import Flask, request, render_template, g
 from flask.ext import login
 from celery import Celery
 from admin_service.events.client import EventsServiceAPI
+from admin_service.events.models import SuggestedEvent
 
 from .extensions import (db, mail, pages, manager, login_manager, babel,
     migrate, csrf, celery, cache)
@@ -157,6 +158,11 @@ def gvars(app):
                     cw_sunday=cw_sunday,
                     nw_monday=nw_monday,
                     nw_sunday=nw_sunday)
+
+    @app.context_processor
+    def suggested_events():
+        count = SuggestedEvent.query.filter(SuggestedEvent.team == g.user.team.id).count()
+        return dict(suggested_events_count=count)
 
     @babel.localeselector
     def get_locale():

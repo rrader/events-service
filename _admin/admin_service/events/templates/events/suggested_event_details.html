@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% set page_title = _('Events DB') %}
+
+{% block content %}
+<h1>{{ _("Suggested event details") }}</h1>
+
+<div class="grid-10 gutter-20">
+    <div class="span-6">
+        <fieldset class="flakes-information-box">
+            <legend>General</legend>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Title</dt>
+                    <dd>{{event.title}}</dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Agenda</dt>
+                    <dd>{%if event.agenda %}{{event.agenda|safe}}{%endif%}</dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Social</dt>
+                    <dd>{%if event.social %}{{event.social|safe}}{%endif%}</dd>
+                </dl>
+            </div>
+        </fieldset>
+    </div>
+    <div class="span-4">
+        <fieldset class="flakes-information-box">
+            <legend>Details</legend>
+
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Place</dt>
+                    <dd>{{event.place}}</dd>
+                </dl>
+            </div>
+            <div class="grid-2">
+                <dl class="span-1">
+                    <dt>Starts at</dt>
+                    <dd>
+                      {% if not event.only_date %}
+                        {{ event.when_start|strftime('%Y-%m-%d %H:%M') }}
+                      {% else %}
+                        {{ event.when_start|strftime('%Y-%m-%d') }}
+                      {% endif %}
+                    </dd>
+                </dl>
+                {% if event.when_end %}
+                <dl class="span-1">
+                    <dt>Ends at</dt>
+                    <dd>
+                      {% if not event.only_date %}
+                        {{ event.when_end|strftime('%Y-%m-%d %H:%M') }}
+                      {% else %}
+                        {{ event.when_end|strftime('%Y-%m-%d') }}
+                      {% endif %}
+                    </dd>
+                </dl>
+                {% endif %}
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Special</dt>
+                    <dd>
+                        {% if event.special %}
+                        <i class="fa fa-check-circle-o"></i>
+                        {% else %}
+                        <i class="fa fa-ban"></i>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Level</dt>
+                    <dd>{{ event.level }}</dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Registration URL</dt>
+                    <dd>
+                        {% if event.registration_url %}
+                        <a href="{{ event.registration_url }}">{{ event.registration_url }}</a>
+                        {% else %}
+                        <i class="fa fa-ban"></i>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Image URL</dt>
+                    <dd>
+                        {% if event.image_url %}
+                        <a href="{{ event.image_url }}">{{ event.image_url }}</a>
+                        {% else %}
+                        <i class="fa fa-ban"></i>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+            <div class="grid-1">
+                <dl class="span-1">
+                    <dt>Submitted by</dt>
+                    <dd>
+                        {{ event.submitter_email }}
+                    </dd>
+                </dl>
+            </div>
+        </fieldset>
+    </div>
+
+</div>
+<br>
+
+<div class="flakes-actions-bar">
+    <a class="action button-green bigger left"
+       href="{{ url_for('events.accept_suggested_event', secret=event.secret) }}">Accept</a>
+    <a class="action button-red bigger right"
+       href="{{ url_for('events.decline_suggested_event', secret=event.secret) }}">Decline</a>
+</div>
+{% endblock %}
