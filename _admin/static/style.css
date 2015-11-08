@@ -7,3 +7,7 @@
 .flakes-table td {
     white-space: normal !important;
 }
+
+.redactor_editor ul {
+    list-style: square;
+}
