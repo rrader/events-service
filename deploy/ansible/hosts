@@ -1,0 +1,14 @@
+[db]
+alpha ansible_ssh_host=eventsmonkey.itkpi.pp.ua
+
+[admin]
+alpha
+
+[events]
+alpha
+
+[redis]
+alpha
+
+[nginx]
+alpha

@@ -1,0 +1,20 @@
+---
+
+- name: Deploy the admin app
+  hosts: admin
+  sudo: yes
+  sudo_user: root
+  remote_user: root
+#  vars:
+#    - setup_git_repo: yes
+#    - update_apt_cache: yes
+  vars_files:
+    - env/base.yaml
+#    - env_vars/vagrant.yml
+
+  roles:
+    - base
+#    - db
+#    - rabbitmq
+#    - web
+#    - celery
