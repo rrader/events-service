@@ -63,7 +63,7 @@ EVENT_CREATION_FORM = t.Dict({
                              'when_end': t.String(allow_blank=True),
                              t.Key('include_time', to_name='only_date', default=False):
                                  t.StrBool >> (lambda x: not x),
-                            }).ignore_extra('_csrf_token')
+                            }).ignore_extra('_csrf_token', 'submit')
 
 
 @events.route('event/create', methods=['GET', 'POST'])
@@ -73,6 +73,9 @@ def create_event():
     if request.method == 'POST':
         id_ = do_create_event()
         if not g.errors:
+            print(request.form)
+            if request.form.get('submit') == 'save_add_more':
+                return redirect(url_for('events.create_event', added=1))
             return redirect(url_for('events.events_details', id_=id_))
     initial = request.form.to_dict()
     if not initial:

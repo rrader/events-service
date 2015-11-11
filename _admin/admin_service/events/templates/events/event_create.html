@@ -38,6 +38,10 @@
     <p class="flakes-message error">{{ error }}</p>
 {% endfor %}
 
+{% if request.args.get('added') %}
+<p class="flakes-message info">Event added successfully</p>
+{% endif %}
+
 <form class="grid-form" method="POST">
     <div class="grid-10 gutter-20">
         <div class="span-6">
@@ -128,7 +132,8 @@
     {% if edit %}
     <input type="submit" class="button-green bigger" value="Edit Event">
     {% else %}
-    <input type="submit" class="button-green bigger" value="Add Event">
+    <button type="submit" class="button-green bigger" name="submit" value="save_details">Save</button>
+    <button type="submit" class="button-green bigger" name="submit" value="save_add_more">Save and create one more</button>
     {% endif %}
     <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
 </form>
