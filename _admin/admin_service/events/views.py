@@ -73,7 +73,6 @@ def create_event():
     if request.method == 'POST':
         id_ = do_create_event()
         if not g.errors:
-            print(request.form)
             if request.form.get('submit') == 'save_add_more':
                 return redirect(url_for('events.create_event', added=1))
             return redirect(url_for('events.events_details', id_=id_))
