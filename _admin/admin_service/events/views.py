@@ -145,9 +145,19 @@ def list_actions():
     if request.form['submit'] == 'delete':
         action_id = uuid.uuid4().hex
         to_delete = [k for k, v in request.form.to_dict().items() if v == 'on']
-        data = {'action': 'delete', 'items': to_delete}
-        cache.set(action_id, data, timeout=5*60)
-        return render_template('events/approve.html', action='delete events', action_id=action_id)
+        if to_delete:
+            data = {'action': 'delete', 'items': to_delete}
+            cache.set(action_id, data, timeout=5*60)
+            return render_template('events/approve.html', action='delete {} events'.format(len(to_delete)), action_id=action_id)
+    elif request.form['submit'] == 'preview':
+        events_list = [k for k, v in request.form.to_dict().items() if v == 'on']
+        if events_list:
+            subset_id = init_digest(events_list, {})
+            set_variable(subset_id, 'template', 'main.html')  # FIXME: hardcoded
+            set_variable(subset_id, 'variables', {})  # FIXME: hardcoded
+            set_default_template_variables(subset_id)
+            generate_preview(subset_id)
+            return redirect(url_for('digestmonkey.preview_content', subset_id=subset_id))
     elif request.form['submit'] == 'approve':
         data = cache.get(request.form['action_id'])
         if not data:
@@ -212,3 +222,7 @@ def decline_suggested_event(secret):
     SuggestedEvent.query.filter(SuggestedEvent.secret == secret).delete()
     db.session.commit()
     return redirect(url_for('events.suggested_events_list'))
+
+
+from admin_service.digestmonkey.utils.digest import init_digest, set_variable, set_default_template_variables, \
+    generate_preview

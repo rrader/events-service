@@ -30,5 +30,6 @@ def parse_named_values(query):
             _eval(node.values[0])
             _eval(node.values[1])
 
-    _eval(ast.parse(query, mode='eval').body)
+    if query:
+        _eval(ast.parse(query, mode='eval').body)
     return values

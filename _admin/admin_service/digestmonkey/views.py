@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
-import uuid
+from collections import OrderedDict, defaultdict
+
 import dateutil.parser
-from github import Github
+from flask import (Blueprint, render_template, g, request, url_for,
+                   redirect)
+import trafaret as t
+
 from admin_service.digestmonkey import mailchimp_utils
-from admin_service.digestmonkey.github_utils import get_github_repo, format_template
+from admin_service.digestmonkey.github_utils import get_github_repo
 from admin_service.digestmonkey.mailchimp_utils import get_mailchimp_api
 from admin_service.digestmonkey.models import DigestMonkeyConfig, PublishedDigest
-
-from flask import (Blueprint, render_template, g, request, url_for,
-    current_app, send_from_directory, json, redirect, make_response, abort)
-
 from flask.ext.login import login_required
+from admin_service.digestmonkey.utils.digest import init_digest, set_variable, set_default_template_variables, \
+    generate_preview
 from admin_service.digestmonkey.utils.query_parser import parse_named_values
-from admin_service.events.client import EventsServiceAPIError
 from admin_service.events.views import EventsList
-
-from ..extensions import pages, csrf, cache, db
-import trafaret as t
+from ..extensions import cache, db
 
 digestmonkey = Blueprint('digestmonkey', __name__, url_prefix='/digestmonkey/', template_folder="templates")
 
@@ -74,34 +72,21 @@ def do_setup():
     sess.commit()
 
 
-def get_event(id_):
-    return current_app.events_api.get_event(g.user.team.events_token, id_)
-
-
 class EventsSubset(EventsList):
-    template = 'digestmonkey/subset.html'
 
+    template = 'digestmonkey/subset.html'
     def post(self):
         if request.form['submit'] == 'subset':
-            events_list = [get_event(k) for k, v in request.form.to_dict().items() if v == 'on']
+            events_list = [k for k, v in request.form.to_dict().items() if v == 'on']
             if not events_list:
                 return redirect(request.url)
-            subset_id = uuid.uuid4().hex
-            query_params = parse_named_values(request.form['query'])
-            cache.set(subset_id,
-                      {'list': events_list,
-                       'query_params': query_params
-                       }, timeout=60*60*24)
+            params = parse_named_values(request.form['query'])
+            subset_id = init_digest(events_list, params)
             return redirect(url_for('digestmonkey.choose_template', subset_id=subset_id))
         return redirect(request.url)
 
+
 digestmonkey.add_url_rule('subset', view_func=login_required(EventsSubset.as_view('make_subset')))
-
-
-def set_variable(subset_id, key, value, timeout=60 * 60 * 24):
-    data = cache.get(subset_id)
-    data[key] = value
-    cache.set(subset_id, data, timeout=timeout)
 
 
 @digestmonkey.route('choose-template/<subset_id>')
@@ -129,22 +114,15 @@ def template_chosen(subset_id, filename):
 @digestmonkey.route('configure-template/<subset_id>', methods=['POST', 'GET'])
 @login_required
 def configure_template(subset_id):
-    data = cache.get(subset_id)
     if request.method == 'POST':
+        data = cache.get(subset_id)
         variables = request.form.to_dict()
         if '_csrf_token' in variables:
             del variables['_csrf_token']
         data['variables'] = variables
         cache.set(subset_id, data, timeout=60*60*24)
         return redirect(url_for('digestmonkey.preview', subset_id=subset_id))
-    variables = json.loads(
-        get_github_repo().get_file_contents("/{}.defaults".format(data['template'])). \
-            decoded_content.decode()
-    )
-    params = data['query_params']
-    for key, value in variables.items():
-        variables[key] = value.format(**params)
-    variables.update(data.get('variables', {}))
+    variables = set_default_template_variables(subset_id)
     return render_template('digestmonkey/configure_template.html',
                            subset_id=subset_id,
                            subset=cache.get(subset_id),
@@ -154,17 +132,7 @@ def configure_template(subset_id):
 @digestmonkey.route('preview/<subset_id>')
 @login_required
 def preview(subset_id):
-    data = cache.get(subset_id)
-    variables = data['variables'].copy()
-    variables.update({'events': sorted_eventslist(
-                        data['list']
-                      ),
-                      'special_events': sorted_eventslist(
-                          [e for e in data['list'] if e['special']]
-                      )})
-    preview = format_template(data['template'], variables)
-    data['preview'] = preview
-    cache.set(subset_id, data, timeout=60*60*24)
+    generate_preview(subset_id)
     return redirect(url_for('digestmonkey.choose_maillist', subset_id=subset_id))
 
 
@@ -195,7 +163,7 @@ def choose_maillist(subset_id):
     s_list = request.args.get('s_list')
     initial = {}
     initial.update(request.form.to_dict())
-    params = data['query_params']
+    params = defaultdict(str, data['query_params'])
 
     if s_list:
         list_info = mailchimp_utils.get_list(s_list)
@@ -264,10 +232,6 @@ def do_create_campaign(data):
     sess.commit()
 
     return url
-
-
-def sorted_eventslist(elist):
-    return sorted(elist, key=lambda e: dateutil.parser.parse(e['when_start']))
 
 
 @digestmonkey.route('digest-details/<id_>')

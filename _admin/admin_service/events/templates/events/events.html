@@ -57,12 +57,14 @@
             {% block action_buttons %}
             <button type="submit" name="submit" form="events_list"
                     class="action button-red smaller right" value="delete">Delete events</button>
-            <a class="action button-gray smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
+            <a class="action button-green smaller right" href="{{ url_for('events.create_event') }}">Add event</a>
+            <button type="submit" name="submit" form="events_list"
+                    class="action button-blue smaller right" value="preview">Preview digest</button>
             {% endblock %}
         </div>
 
         {% block events_list %}
-        <form id="events_list" name="events_list" method="post">
+        <form id="events_list" name="events_list" method="post" target="_blank">
             <table class="flakes-table">
                 <colgroup>
                     <col span="1" style="width:20px" />
