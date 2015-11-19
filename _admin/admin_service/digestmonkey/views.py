@@ -12,6 +12,7 @@ from flask import (Blueprint, render_template, g, request, url_for,
     current_app, send_from_directory, json, redirect, make_response, abort)
 
 from flask.ext.login import login_required
+from admin_service.digestmonkey.utils.query_parser import parse_named_values
 from admin_service.events.client import EventsServiceAPIError
 from admin_service.events.views import EventsList
 
@@ -86,11 +87,21 @@ class EventsSubset(EventsList):
             if not events_list:
                 return redirect(request.url)
             subset_id = uuid.uuid4().hex
-            cache.set(subset_id, {'list': events_list}, timeout=60*60*24)
+            query_params = parse_named_values(request.form['query'])
+            cache.set(subset_id,
+                      {'list': events_list,
+                       'query_params': query_params
+                       }, timeout=60*60*24)
             return redirect(url_for('digestmonkey.choose_template', subset_id=subset_id))
         return redirect(request.url)
 
 digestmonkey.add_url_rule('subset', view_func=login_required(EventsSubset.as_view('make_subset')))
+
+
+def set_variable(subset_id, key, value, timeout=60 * 60 * 24):
+    data = cache.get(subset_id)
+    data[key] = value
+    cache.set(subset_id, data, timeout=timeout)
 
 
 @digestmonkey.route('choose-template/<subset_id>')
@@ -98,18 +109,20 @@ digestmonkey.add_url_rule('subset', view_func=login_required(EventsSubset.as_vie
 def choose_template(subset_id):
     templates = [file for file in get_github_repo().get_dir_contents('/')
                  if file.name.endswith(".html") or file.name.endswith(".template")]
-    return render_template('digestmonkey/choose_template.html',
-                           templates=templates,
-                           subset_id=subset_id,
-                           subset=cache.get(subset_id))
+    if len(templates) == 1:
+        set_variable(subset_id, 'template', templates[0].name)
+        return redirect(url_for('digestmonkey.configure_template', subset_id=subset_id))
+    else:
+        return render_template('digestmonkey/choose_template.html',
+                               templates=templates,
+                               subset_id=subset_id,
+                               subset=cache.get(subset_id))
 
 
 @digestmonkey.route('choose-template/<subset_id>/<filename>')
 @login_required
 def template_chosen(subset_id, filename):
-    data = cache.get(subset_id)
-    data['template'] = filename
-    cache.set(subset_id, data, timeout=60*60*24)
+    set_variable(subset_id, 'template', filename)
     return redirect(url_for('digestmonkey.configure_template', subset_id=subset_id))
 
 
@@ -128,6 +141,9 @@ def configure_template(subset_id):
         get_github_repo().get_file_contents("/{}.defaults".format(data['template'])). \
             decoded_content.decode()
     )
+    params = data['query_params']
+    for key, value in variables.items():
+        variables[key] = value.format(**params)
     variables.update(data.get('variables', {}))
     return render_template('digestmonkey/configure_template.html',
                            subset_id=subset_id,
@@ -149,9 +165,7 @@ def preview(subset_id):
     preview = format_template(data['template'], variables)
     data['preview'] = preview
     cache.set(subset_id, data, timeout=60*60*24)
-    return render_template('digestmonkey/preview.html',
-                           subset_id=subset_id,
-                           subset=cache.get(subset_id))
+    return redirect(url_for('digestmonkey.choose_maillist', subset_id=subset_id))
 
 
 @digestmonkey.route('preview-content/<subset_id>')
@@ -181,13 +195,14 @@ def choose_maillist(subset_id):
     s_list = request.args.get('s_list')
     initial = {}
     initial.update(request.form.to_dict())
+    params = data['query_params']
 
     if s_list:
         list_info = mailchimp_utils.get_list(s_list)
 
         subject = list_info['default_subject']
         if subject:
-            initial['subject'] = subject
+            initial['subject'] = subject.format(**params)
 
         from_name = list_info['default_from_name']
         if from_name:

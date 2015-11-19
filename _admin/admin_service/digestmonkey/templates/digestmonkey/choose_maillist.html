@@ -4,63 +4,75 @@
 {% block content %}
 <h1>{{ _("Digest Monkey") }} <i class="fa fa-hand-peace-o"></i></h1>
 
-<p>Step 1: you have selected {{ subset.list|length }} events</p>
-<p><a href="{{ url_for('digestmonkey.choose_template', subset_id=subset_id) }}">Step 2</a>: you have selected template "{{ subset.template}}"</p>
-<p><a href="{{ url_for('digestmonkey.configure_template', subset_id=subset_id) }}">Step 3</a>: variables set for template</p>
-<p><a href="{{ url_for('digestmonkey.preview', subset_id=subset_id) }}">Step 4</a>: preview approved</p>
-<h2>Step 5</h2>
+<div class="grid-2 gutter-10">
+    <div class="span-1">
+        <p>Step 1: you have selected {{ subset.list|length }} events</p>
+        <p><a href="{{ url_for('digestmonkey.choose_template', subset_id=subset_id) }}">Step 2</a>: you have selected template "{{ subset.template}}"</p>
+        <p><a href="{{ url_for('digestmonkey.configure_template', subset_id=subset_id) }}">Step 3</a>: variables set for template</p>
+        <h2>Step 4</h2>
 
-{% if not s_list %}
-        <p>Select the Subscription List</p>
-        <ul>
+        {% if not s_list %}
+                <p>Select the Subscription List</p>
+                <ul>
+                        {% for id_, item in lists.items() %}
+                        <li>
+                                <a href="{{ url_for('digestmonkey.choose_maillist', subset_id=subset_id, s_list=id_) }}">
+                                {{ item }}
+                                </a>
+                        </li>
+                        {% endfor %}
+                </ul>
+        {% else %}
                 {% for id_, item in lists.items() %}
-                <li>
-                        <a href="{{ url_for('digestmonkey.choose_maillist', subset_id=subset_id, s_list=id_) }}">
-                        {{ item }}
-                        </a>
-                </li>
+                        {% if s_list == id_ %}
+                                <p>You have selected the <b>"{{ item }}"</b> Subscribers List [<a href="{{ url_for('digestmonkey.choose_maillist', subset_id=subset_id) }}">change</a>]</p>
+                        {% endif %}
                 {% endfor %}
-        </ul>
-{% else %}
-        {% for id_, item in lists.items() %}
-                {% if s_list == id_ %}
-                        <p>You have selected the <b>"{{ item }}"</b> Subscribers List [<a href="{{ url_for('digestmonkey.choose_maillist', subset_id=subset_id) }}">change</a>]</p>
-                {% endif %}
+        {% endif %}
+
+        {% for error in errors %}
+            <p class="flakes-message error">{{ error }}</p>
         {% endfor %}
-{% endif %}
 
-{% for error in errors %}
-    <p class="flakes-message error">{{ error }}</p>
-{% endfor %}
-
-{% if s_list %}
-<form class="grid-form" method="POST">
-    <fieldset>
-        <legend>Email properties</legend>
-        <div data-row-span="1">
-            <div data-field-span="1">
-                <label>Subject</label>
-                <input type="text" name="subject" value="{% if initial.subject %}{{ initial.subject }}{% endif %}">
-            </div>
-        </div>
-        <div data-row-span="1">
-            <div data-field-span="1">
-                <label>"From:" Name</label>
-                <input type="text" name="from_name" value="{% if initial.from_name %}{{ initial.from_name }}{% endif %}">
-            </div>
-        </div>
-        <div data-row-span="1">
-            <div data-field-span="1">
-                <label>"From:" Email</label>
-                <input type="text" name="from_email" value="{% if initial.from_email %}{{ initial.from_email }}{% endif %}">
-            </div>
-        </div>
-    </fieldset>
-    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
-    <br>
-    <input type="submit" class="button-magenta bigger" value="Create MailChimp campaign">
-</form>
-{% endif %}
-
-
+        {% if s_list %}
+        <form class="grid-form" method="POST">
+            <fieldset>
+                <legend>Email properties</legend>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>Subject</label>
+                        <input type="text" name="subject" value="{% if initial.subject %}{{ initial.subject }}{% endif %}">
+                    </div>
+                </div>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>"From:" Name</label>
+                        <input type="text" name="from_name" value="{% if initial.from_name %}{{ initial.from_name }}{% endif %}">
+                    </div>
+                </div>
+                <div data-row-span="1">
+                    <div data-field-span="1">
+                        <label>"From:" Email</label>
+                        <input type="text" name="from_email" value="{% if initial.from_email %}{{ initial.from_email }}{% endif %}">
+                    </div>
+                </div>
+            </fieldset>
+            <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+            <br>
+            <input type="submit" class="button-magenta bigger" value="Create MailChimp campaign">
+        </form>
+        {% endif %}
+    </div>
+    <div class="span-1">
+        <fieldset class="flakes-information-box">
+            <legend>Preview
+                <a href="{{ url_for('digestmonkey.preview_content', subset_id=subset_id) }}" target="_blank">
+                    <i class="fa fa-expand"></i>
+                </a>
+            </legend>
+            <iframe src="{{ url_for('digestmonkey.preview_content', subset_id=subset_id) }}" width="100%"
+                height="600px" frameborder="0"></iframe>
+        </fieldset>
+    </div>
+</div>
 {% endblock %}

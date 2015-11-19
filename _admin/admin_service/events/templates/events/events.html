@@ -25,11 +25,11 @@
             <legend>Predefined Filters</legend>
             <dl>
                 <dt>Current week</dt>
-                <dd><a href="?query=(when_start >= '{{ cw_monday|strftime('%Y-%m-%d') }}') and (when_start < '{{ cw_sunday|strftime('%Y-%m-%d') }}')">{{ cw_monday|strftime('%Y-%m-%d') }} .. {{ cw_sunday|strftime('%Y-%m-%d') }}</a></dd>
+                <dd><a href="?query=(when_start >= named_value('begin', '{{ cw_monday|strftime('%Y-%m-%d') }}')) and (when_start < named_value('end', '{{ cw_sunday|strftime('%Y-%m-%d') }}'))">{{ cw_monday|strftime('%Y-%m-%d') }} .. {{ cw_sunday|strftime('%Y-%m-%d') }}</a></dd>
             </dl>
             <dl>
                 <dt>Next week</dt>
-                <dd><a href="?query=(when_start >= '{{ nw_monday|strftime('%Y-%m-%d') }}') and (when_start < '{{ nw_sunday|strftime('%Y-%m-%d') }}')">{{ nw_monday|strftime('%Y-%m-%d') }} .. {{ nw_sunday|strftime('%Y-%m-%d') }}</a></dd>
+                <dd><a href="?query=(when_start >= named_value('begin', '{{ nw_monday|strftime('%Y-%m-%d') }}')) and (when_start < named_value('end', '{{ nw_sunday|strftime('%Y-%m-%d') }}'))">{{ nw_monday|strftime('%Y-%m-%d') }} .. {{ nw_sunday|strftime('%Y-%m-%d') }}</a></dd>
             </dl>
         </fieldset>
     </div>
@@ -38,7 +38,9 @@
     <div class="span-1">
         <div class="flakes-search">
             <form method="get" id="search">
-                <input class="search-box search" placeholder="Search Events" autofocus name="query" value="{{ query }}">
+                <input class="search-box search" placeholder="Search Events" autofocus name="query" value="{{ query }}"
+                        onblur="document.events_list.query.value = this.value;">
+                <input type="hidden" name="query" form="events_list">
             </form>
         </div>
     </div>
@@ -60,7 +62,7 @@
         </div>
 
         {% block events_list %}
-        <form id="events_list" method="post">
+        <form id="events_list" name="events_list" method="post">
             <table class="flakes-table">
                 <colgroup>
                     <col span="1" style="width:20px" />

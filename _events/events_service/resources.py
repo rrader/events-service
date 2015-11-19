@@ -40,6 +40,15 @@ def parse_query(model, query):
             return node.value
         elif isinstance(node, ast.Name):
             return model.__mapper__.columns[node.id]
+        elif isinstance(node, ast.Call):
+            if len(node.args) != 2 and node.kwargs is not None:
+                raise TypeError(node)
+            if node.func.id == 'named_value':
+                if not isinstance(node.args[0], ast.Str):
+                    raise TypeError(node.args[0])
+                return _eval(node.args[1])
+            else:
+                raise TypeError(node)
         elif isinstance(node, ast.Compare):
             if len(node.comparators) != 1 and len(node.ops) != 1:
                 raise TypeError(node)
