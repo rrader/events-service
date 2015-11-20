@@ -37,9 +37,9 @@ commands:
             touch /work/.tmp.dbcreation.lock
             while [ -f /work/.tmp.dbcreation.lock ]; do sleep 0.2; done
             alembic upgrade head
-            python3 manage.py add_provider TEST1 --key 424242
-            python3 manage.py add_provider TEST2 --key 434343
-            python3 manage.py import 424242
+            #python3 manage.py add_provider TEST1 --key 424242
+            #python3 manage.py add_provider TEST2 --key 434343
+            #python3 manage.py import 424242
             python3 manage.py run_server
 
       db: !Command
@@ -56,6 +56,7 @@ commands:
             su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template1';\""
             su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT -c \"CREATE USER $PG_USER WITH PASSWORD '$PG_PASSWORD';\""
             su postgres -c "$PG_BIN/createdb -h 127.0.0.1 -p $PG_PORT $PG_DB -O $PG_USER";
+            su postgres -c "$PG_BIN/psql -h 127.0.0.1 -p $PG_PORT $PG_DB" < dump.sql
             rm -f /work/.tmp.dbcreation.lock
             wait
 
